@@ -1,5 +1,6 @@
-import { RecipeCard } from "./components/RecipeCard";
-import { fetchRecipes } from "@/lib/api";
+
+import RecipeCard from "./components/RecipeCard";
+import { fetchRecipes } from "../lib/api";
 
 /**
  * The Home component fetches recipes and displays them in a grid layout.
@@ -35,7 +36,7 @@ export default async function Home() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {recipes.map((recipe) => (
           // Render each recipe using the RecipeCard component
-          <RecipeCard key={recipe._id} recipe={recipe} />
+          <RecipeCard key={recipe._id} recipe={recipe}/>
         ))}
       </div>
     </main>
