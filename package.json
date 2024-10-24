@@ -18,7 +18,7 @@
     "framer-motion": "^11.11.9",
     "keyv": "^5.1.2",
     "mongodb": "^6.10.0",
-    "next": "^15.0.1",
+    "next": "^14.2.16",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -29,7 +29,7 @@
     "@storybook/addon-links": "^8.3.6",
     "@storybook/addon-onboarding": "^8.3.6",
     "@storybook/blocks": "^8.3.6",
-    "@storybook/nextjs": "^8.3.6",
+    "@storybook/nextjs": "^7.0.14",
     "@storybook/react": "^8.3.6",
     "@storybook/test": "^8.3.6",
     "eslint": "^8",
