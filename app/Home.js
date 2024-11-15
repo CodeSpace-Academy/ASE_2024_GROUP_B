@@ -67,7 +67,7 @@ export default function Home({ searchParams }) {
                       Rating: {recipe.rating} / 5
                     </span>
                   </div>
-                  <Link href={`/recipe/${recipe._id}`} passHref>
+                  <Link href={`/recipes/${recipe._id}`} passHref>
                     <button className="mt-4 w-full py-2 bg-orange-500 text-white rounded-md">
                       View Recipe
                     </button>

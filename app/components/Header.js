@@ -47,6 +47,20 @@ const Header = () => {
               Favourites
             </span>
           </Link>
+          <Link href="/login">
+          <button className="bg-white px-2 py-1 rounded-full">
+            <span className="font-bold text-green-600">
+              Login
+            </span>
+          </button>
+          </Link>
+          <Link href="/signup">
+          <button className="bg-white px-2 py-1 rounded-full">
+            <span className="font-bold text-blue-600">
+              Sign Up
+            </span>
+          </button>
+          </Link>
         </div>
       </div>
     </header>

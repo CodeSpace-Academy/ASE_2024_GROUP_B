@@ -22,7 +22,7 @@ const StepsFilter = ({ selectedSteps, setSelectedSteps }) => {
   const handleSearch = (event) => {
     event.preventDefault();
     if (selectedSteps && !isNaN(selectedSteps)) {
-      const url = `/?page=1&steps=${selectedSteps}`;
+      const url = `/recipe?page=1&steps=${selectedSteps}`;
       router.push(url);
     } else {
       alert("Please enter a valid number for steps.");
