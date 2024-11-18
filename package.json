@@ -23,6 +23,7 @@
     "dotenv": "^16.4.5",
     "faker": "^6.6.6",
     "framer-motion": "^11.11.9",
+    "jsonwebtoken": "^9.0.2",
     "keyv": "^5.1.2",
     "lucide-react": "^0.453.0",
     "mongodb": "^6.10.0",

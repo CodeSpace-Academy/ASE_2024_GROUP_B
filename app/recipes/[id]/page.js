@@ -2,20 +2,10 @@ import { fetchProductById } from "../../../lib/api";
 import Image from "next/image";
 import { Clock, Users } from "lucide-react";
 import { Card, CardContent } from "../../components/ui/card";
+import RecipeReviews from "../../components/RecipeReviews";
 
 /**
  * The RecipeDetail component fetches and displays a specific recipe based on its ID.
- * It shows the recipe's details, including prep time, cooking time, total time, servings, tags, and images.
- *
- * @async
- * @function RecipeDetail
- * @param {Object} props - The props object.
- * @param {Object} props.params - The route parameters, containing the recipe ID.
- * @returns {JSX.Element} A React component that displays recipe details.
- *
- * @example
- * // Usage of RecipeDetail component
- * <RecipeDetail params={{ id: 'recipeId' }} />
  */
 export default async function RecipeDetail({ params }) {
   const { id } = params;
@@ -53,7 +43,6 @@ export default async function RecipeDetail({ params }) {
     );
   }
 
-  // Destructure with the correct property names
   const {
     prep,
     cook,
@@ -64,17 +53,11 @@ export default async function RecipeDetail({ params }) {
     images,
     ingredients,
     instructions,
-    nutrition
+    nutrition,
   } = recipe;
 
-  // Calculate total time
   const totalTime = (prep || 0) + (cook || 0);
 
-  /**
-   * Formats time in minutes to a readable string (e.g., "15 mins").
-   * @param {number} timeInMinutes - The time in minutes.
-   * @returns {string} The formatted time string.
-   */
   const formatTime = (timeInMinutes) => {
     return `${timeInMinutes} mins`;
   };
@@ -85,12 +68,11 @@ export default async function RecipeDetail({ params }) {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">{title}</h1>
         <a
-        href="/recipe"
-        className="mt-4 block text-center text-white bg-brown rounded-full px-4 py-2 hover:bg-green-800 transition duration-200"
+          href="/recipe"
+          className="mt-4 block text-center text-white bg-brown rounded-full px-4 py-2 hover:bg-green-800 transition duration-200"
         >
           Back to Home
         </a>
-
       </div>
 
       {/* Tags */}
@@ -113,20 +95,25 @@ export default async function RecipeDetail({ params }) {
 
       {/* Recipe Overview */}
       <div className="flex flex-wrap gap-6 mb-6">
-        <div className="flex items-center gap-2">
-          <Clock className="w-5 h-5 text-gray-600" />
-          <div>
-            <p className="text-sm text-gray-600">Prep Time</p>
-            <p className="font-medium">{formatTime(prep)}</p>
+        {/* Time and Servings */}
+        {prep !== undefined && (
+          <div className="flex items-center gap-2">
+            <Clock className="w-5 h-5 text-gray-600" />
+            <div>
+              <p className="text-sm text-gray-600">Prep Time</p>
+              <p className="font-medium">{formatTime(prep)}</p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Clock className="w-5 h-5 text-gray-600" />
-          <div>
-            <p className="text-sm text-gray-600">Cook Time</p>
-            <p className="font-medium">{formatTime(cook)}</p>
+        )}
+        {cook !== undefined && (
+          <div className="flex items-center gap-2">
+            <Clock className="w-5 h-5 text-gray-600" />
+            <div>
+              <p className="text-sm text-gray-600">Cook Time</p>
+              <p className="font-medium">{formatTime(cook)}</p>
+            </div>
           </div>
-        </div>
+        )}
         <div className="flex items-center gap-2">
           <Clock className="w-5 h-5 text-gray-600" />
           <div>
@@ -171,28 +158,32 @@ export default async function RecipeDetail({ params }) {
         </div>
       )}
 
-      {/* Recipe Content */}
+      {/* Content */}
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Ingredients Section */}
+        {/* Ingredients */}
         <Card>
-            <CardContent className="pt-6">
-              <h2 className="text-2xl font-semibold mb-4">Ingredients</h2>
-              <ul className="space-y-2">
-                {ingredients && Object.keys(ingredients).length > 0 ? (
-                  Object.entries(ingredients).map(([ingredient, quantity], index) => (
+          <CardContent className="pt-6">
+            <h2 className="text-2xl font-semibold mb-4">Ingredients</h2>
+            <ul className="space-y-2">
+              {ingredients && Object.keys(ingredients).length > 0 ? (
+                Object.entries(ingredients).map(
+                  ([ingredient, quantity], index) => (
                     <li key={index} className="flex items-start gap-2">
                       <span className="mt-1.5 w-2 h-2 rounded-full bg-teal-500 flex-shrink-0" />
-                      <span className="text-gray-700">{quantity} {ingredient}</span> {/* unordered list */}
+                      <span className="text-gray-700">
+                        {quantity} {ingredient}
+                      </span>
                     </li>
-                  ))
-                ) : (
-                  <li className="text-gray-500">No ingredients available.</li>
-                )}
-              </ul>
-            </CardContent>
-          </Card>
+                  )
+                )
+              ) : (
+                <li className="text-gray-500">No ingredients available.</li>
+              )}
+            </ul>
+          </CardContent>
+        </Card>
 
-        {/* Instructions Section */}
+        {/* Instructions */}
         <Card>
           <CardContent className="pt-6">
             <h2 className="text-2xl font-semibold mb-4">Instructions</h2>
@@ -214,39 +205,11 @@ export default async function RecipeDetail({ params }) {
         </Card>
       </div>
 
-      {/* Nutritional Information */}
-      {Object.keys(nutrition).length > 0 && (
-        <Card className="mt-8">
-          <CardContent className="pt-6">
-            <h2 className="text-2xl font-semibold mb-4">Nutritional Information</h2>
-            <div className="grid grid-cols-2 gap-4 text-gray-700">
-              {nutrition.calories && (
-                <div>
-                  <p className="text-sm">Calories</p>
-                  <p className="font-medium">{nutrition.calories} kcal</p>
-                </div>
-              )}
-              {nutrition.fats && (
-                <div>
-                  <p className="text-sm">Fats</p>
-                  <p className="font-medium">{nutrition.fats} g</p>
-                </div>
-              )}
-              {nutrition.carbohydrates && (
-                <div>
-                  <p className="text-sm">Carbohydrates</p>
-                  <p className="font-medium">{nutrition.carbohydrates} g</p>
-                </div>
-              )}
-              {nutrition.proteins && (
-                <div>
-                  <p className="text-sm">Proteins</p>
-                  <p className="font-medium">{nutrition.proteins} g</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+      {/* Reviews */}
+      {id ? (
+        <RecipeReviews recipeId={id} />
+      ) : (
+        <p className="text-red-500">Loading recipe ID...</p>
       )}
     </main>
   );
