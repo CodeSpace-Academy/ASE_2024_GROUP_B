@@ -6,13 +6,14 @@ import React, { useState } from "react";
  * Login Component
  *
  * @component
- * @returns {JSX.Element} A login form with email and password fields, including a show/hide password toggle.
+ * @returns {JSX.Element} A login form with email and password fields, including a show/hide password toggle and loading indicator.
  */
 export default function Login() {
   const [email, setEmail] = useState(""); // State for email input
   const [password, setPassword] = useState(""); // State for password input
   const [error, setError] = useState(""); // State for error messages
   const [success, setSuccess] = useState(""); // State for success messages
+  const [loading, setLoading] = useState(false); // State to manage the loading indicator
   const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
 
   /**
@@ -24,10 +25,12 @@ export default function Login() {
     e.preventDefault();
     setError("");
     setSuccess("");
+    setLoading(true); // Show loading indicator
 
     // Validation
     if (!email || !password) {
       setError("Both fields are required.");
+      setLoading(false); // Stop loading
       return;
     }
 
@@ -40,6 +43,7 @@ export default function Login() {
         body: JSON.stringify({ email, password }),
       });
 
+      setLoading(false); // Stop loading
       if (response.status === 200) {
         const data = await response.json();
         setSuccess("Login successful!");
@@ -47,10 +51,11 @@ export default function Login() {
         setPassword("");
       } else {
         const errorData = await response.json();
-        setError(errorData.error || "Invalid email or password.");
+        setError(errorData.error || "Invalid email or password. Please try again.");
       }
     } catch (err) {
-      setError("Failed to connect to the server.");
+      setLoading(false); // Stop loading
+      setError("Failed to connect to the server. Please check your network and try again.");
     }
   };
 
@@ -100,9 +105,12 @@ export default function Login() {
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-200"
+            className={`w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-200 ${
+              loading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            disabled={loading} // Disable button while loading
           >
-            Log In
+            {loading ? "Logging you in..." : "Log In"}
           </button>
         </form>
         <p className="text-center text-sm text-gray-500 mt-4">
