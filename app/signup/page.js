@@ -3,7 +3,7 @@
 /**
  * @file SignUp.jsx
  * @description A Sign Up form component that allows users to register with email and password. 
- * Includes validation and error handling for mismatched passwords and required fields.
+ * Includes validation, error handling, and a loading indicator during processing.
  * Uses the `/api/authorisation/signup` API endpoint to register users.
  */
 
@@ -21,6 +21,7 @@ export default function SignUp() {
   const [confirmPassword, setConfirmPassword] = useState(""); // State to store the confirm password input
   const [error, setError] = useState(""); // State to store error messages
   const [success, setSuccess] = useState(""); // State to store success messages
+  const [loading, setLoading] = useState(false); // State to manage the loading indicator
   const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
 
   /**
@@ -32,14 +33,17 @@ export default function SignUp() {
     e.preventDefault();
     setError("");
     setSuccess("");
+    setLoading(true); // Show loading indicator
 
     // Validation
     if (!email || !password || !confirmPassword) {
       setError("All fields are required.");
+      setLoading(false); // Stop loading
       return;
     }
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      setLoading(false); // Stop loading
       return;
     }
 
@@ -52,18 +56,19 @@ export default function SignUp() {
         body: JSON.stringify({ email, password }),
       });
 
+      setLoading(false); // Stop loading
       if (response.status === 201) {
-        const data = await response.json();
         setSuccess("User registered successfully!");
         setEmail("");
         setPassword("");
         setConfirmPassword("");
       } else {
         const errorData = await response.json();
-        setError(errorData.error || "Something went wrong.");
+        setError(errorData.error || "Something went wrong. Please try again.");
       }
     } catch (err) {
-      setError("Failed to connect to the server.");
+      setLoading(false); // Stop loading
+      setError("Failed to connect to the server. Please check your network and try again.");
     }
   };
 
@@ -135,9 +140,12 @@ export default function SignUp() {
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-200"
+            className={`w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-200 ${
+              loading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            disabled={loading} // Disable button while loading
           >
-            Sign Up
+            {loading ? "Signing you up..." : "Sign Up"}
           </button>
         </form>
         <p className="text-center text-sm text-gray-500 mt-4">
