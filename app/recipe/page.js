@@ -1,36 +1,53 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import RecipeCard from "../components/RecipeCard";
 import SearchBar from "../components/SearchBar";
 import AdvancedFiltering from "../components/AdvancedFiltering";
 import { fetchRecipes } from "../../lib/api";
-import { useState, useEffect } from "react";
 import Sort from "../components/Sort";
+import { useSearchParams } from "next/navigation";
 
-const generateMockRating = () => {
-  return (Math.random() * 4 + 1).toFixed(1);
-};
+const generateMockRating = () => (Math.random() * 4 + 1).toFixed(1);
 
-export default function RecipePage({ searchParams }) {
-  const currentPage = parseInt(searchParams.page) || 1;
-  const [sortBy, setSortBy] = useState(searchParams.sortBy || "");
-  const [sortOrder, setSortOrder] = useState(searchParams.sortOrder || "");
+export default function RecipePage() {
+  const searchParams = useSearchParams();
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [totalPages, setTotalPages] = useState(1); // Add total pages state
+  const [totalPages, setTotalPages] = useState(1);
+
+  const currentPage = parseInt(searchParams.get("page")) || 1;
+  const sortBy = searchParams.get("sortBy") || "";
+  const sortOrder = searchParams.get("sortOrder") || "";
+  const limit = parseInt(searchParams.get("limit")) || 20;
+
+  const constructPageUrl = (pageNumber) => {
+    const params = new URLSearchParams();
+    params.set("page", pageNumber.toString());
+    if (searchParams.get("search")) params.set("search", searchParams.get("search"));
+    if (searchParams.get("category")) params.set("category", searchParams.get("category"));
+    if (searchParams.get("tags")) params.set("tags", searchParams.get("tags"));
+    if (searchParams.get("steps")) params.set("steps", searchParams.get("steps"));
+    if (sortBy) params.set("sortBy", sortBy);
+    if (sortOrder) params.set("sortOrder", sortOrder);
+
+    return `/recipe?${params.toString()}`;
+  };
 
   useEffect(() => {
-    const fetchAndSortRecipes = async () => {
+    async function getData() {
       setLoading(true);
       try {
         const searchParamsObj = {
           page: currentPage,
-          limit: searchParams.limit || 20,
-          search: searchParams.search || "",
-          category: searchParams.category || "",
-          selectedTags: searchParams.tags ? searchParams.tags.split(",") : [],
-          selectedSteps: searchParams.steps || "",
+          limit,
+          search: searchParams.get("search") || "",
+          category: searchParams.get("category") || "",
+          selectedTags: searchParams.get("tags")
+            ? searchParams.get("tags").split(",")
+            : [],
+          selectedSteps: searchParams.get("steps") || "",
           sortBy,
           sortOrder,
         };
@@ -46,41 +63,28 @@ export default function RecipePage({ searchParams }) {
           searchParamsObj.sortOrder
         );
 
-        let processedRecipes = data.map(recipe => ({
+        let processedRecipes = data.map((recipe) => ({
           ...recipe,
           rating: generateMockRating(),
         }));
 
-        // Only sort by rating if no other sort criteria is specified
         if (!sortBy && sortOrder) {
-          processedRecipes = processedRecipes.sort((a, b) => 
+          processedRecipes = processedRecipes.sort((a, b) =>
             sortOrder === "desc" ? b.rating - a.rating : a.rating - b.rating
           );
         }
 
         setRecipes(processedRecipes);
+        setTotalPages(Math.ceil(data.totalCount / limit)); // Update total pages if the API supports pagination
       } catch (error) {
         console.error("Error fetching recipes:", error);
       } finally {
         setLoading(false);
       }
-    };
+    }
 
-    fetchAndSortRecipes();
-  }, [searchParams, sortBy, sortOrder, currentPage]);
-
-  const constructPageUrl = (pageNumber) => {
-    const params = new URLSearchParams();
-    params.set("page", pageNumber.toString());
-    if (searchParams.search) params.set("search", searchParams.search);
-    if (searchParams.category) params.set("category", searchParams.category);
-    if (searchParams.tags) params.set("tags", searchParams.tags);
-    if (searchParams.steps) params.set("steps", searchParams.steps);
-    if (sortBy) params.set("sortBy", sortBy);
-    if (sortOrder) params.set("sortOrder", sortOrder);
-    
-    return `/recipe?${params.toString()}`;
-  };
+    getData();
+  }, [currentPage, limit, sortBy, sortOrder, searchParams]);
 
   const noRecipesFound = recipes.length === 0 && !loading;
 
@@ -92,50 +96,48 @@ export default function RecipePage({ searchParams }) {
         </div>
         <div className="flex items-center gap-4">
           <AdvancedFiltering
-            selectedCategory={searchParams.category}
-            selectedSteps={searchParams.steps}
-            selectedTags={searchParams.tags ? searchParams.tags.split(",") : []}
+            selectedCategory={searchParams.get("category")}
+            selectedSteps={searchParams.get("steps")}
+            selectedTags={
+              searchParams.get("tags") ? searchParams.get("tags").split(",") : []
+            }
             page={currentPage}
           />
-          <Sort
-            selectedSortBy={sortBy}
-            selectedSortOrder={sortOrder}
-          />
+          <Sort selectedSortBy={sortBy} selectedSortOrder={sortOrder} />
         </div>
       </div>
 
       <h1 className="text-2xl font-bold text-center mb-8">Recipes</h1>
 
-      {/* Active Filters Display */}
       <div className="flex flex-wrap justify-center gap-2 mb-4">
-        {searchParams.search && (
+        {searchParams.get("search") && (
           <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-200 text-gray-700">
-            Search: {searchParams.search}
+            Search: {searchParams.get("search")}
           </span>
         )}
-        {searchParams.steps && (
+        {searchParams.get("steps") && (
           <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-200 text-gray-700">
-            Steps: {searchParams.steps}
+            Steps: {searchParams.get("steps")}
           </span>
         )}
-        {searchParams.category && (
+        {searchParams.get("category") && (
           <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-200 text-gray-700">
-            Category: {searchParams.category}
+            Category: {searchParams.get("category")}
           </span>
         )}
       </div>
 
-      {/* Loading and Error States */}
       {loading ? (
         <div className="flex justify-center items-center min-h-[200px]">
           <p className="text-lg text-gray-600">Loading recipes...</p>
         </div>
       ) : noRecipesFound ? (
         <div className="text-center py-8">
-          <p className="text-lg text-red-500">No recipes found with the specified criteria.</p>
+          <p className="text-lg text-red-500">
+            No recipes found with the specified criteria.
+          </p>
         </div>
       ) : (
-        // Recipe Grid
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {recipes.map((recipe) => (
             <RecipeCard key={recipe._id} recipe={recipe} />
@@ -143,7 +145,6 @@ export default function RecipePage({ searchParams }) {
         </div>
       )}
 
-      {/* Pagination */}
       {!loading && recipes.length > 0 && (
         <div className="flex justify-center mt-8 items-center gap-4">
           <Link
@@ -165,7 +166,13 @@ export default function RecipePage({ searchParams }) {
 
           <Link
             href={constructPageUrl(currentPage + 1)}
-            className="w-10 h-10 flex items-center justify-center rounded-full text-white bg-orange-500 hover:bg-orange-600 transition-colors"
+            className={`w-10 h-10 flex items-center justify-center rounded-full text-white ${
+              currentPage >= totalPages
+                ? "bg-gray-300 cursor-not-allowed"
+                : "bg-orange-500 hover:bg-orange-600"
+            }`}
+            aria-disabled={currentPage >= totalPages}
+            tabIndex={currentPage >= totalPages ? -1 : 0}
           >
             →
           </Link>

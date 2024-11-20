@@ -1,14 +1,8 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function Sort({
-  selectedSortBy = "",
-  selectedSortOrder = "",
-  onSortByChange = () => {},
-  onSortOrderChange = () => {},
-}) {
+export default function Sort({ selectedSortBy = "", selectedSortOrder = "" }) {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [sortBy, setSortBy] = useState(selectedSortBy);
   const [sortOrder, setSortOrder] = useState(selectedSortOrder);
@@ -25,20 +19,18 @@ export default function Sort({
 
   const handleSortByChange = (value) => {
     setSortBy(value);
-    onSortByChange(value);
   };
 
   const handleSortOrderChange = (value) => {
     setSortOrder(value);
-    onSortOrderChange(value);
   };
 
   const handleApplySort = () => {
     const params = new URLSearchParams(searchParams.toString());
     if (sortBy) params.set("sortBy", sortBy);
     if (sortOrder) params.set("sortOrder", sortOrder);
-    
-    // Changed from "/" to "/recipe"
+
+    // Update the URL with sorting parameters and preserve other query parameters
     router.push(`/recipe?${params.toString()}`);
     setIsSortOpen(false);
   };
@@ -47,13 +39,11 @@ export default function Sort({
     const params = new URLSearchParams(searchParams.toString());
     params.delete("sortBy");
     params.delete("sortOrder");
-    
-    // Changed from "/" to "/recipe"
+
+    // Clear the sort parameters and update the URL
     router.push(`/recipe?${params.toString()}`);
     setSortBy("");
     setSortOrder("");
-    onSortByChange("");
-    onSortOrderChange("");
     setIsSortOpen(false);
   };
 
