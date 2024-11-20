@@ -11,10 +11,10 @@ export default function Sort({ selectedSortBy = "", selectedSortOrder = "" }) {
   const searchParams = useSearchParams();
 
   const sortOptions = [
-    { label: "Prep Time", value: "PREPTIME" },
-    { label: "Cook Time", value: "COOKTIME" },
-    { label: "Steps", value: "STEPS" },
-    { label: "Date", value: "DATE" },
+    { label: "Prep Time", value: "preptime" },
+    { label: "Cook Time", value: "cooktime" },
+    { label: "Steps", value: "steps" },
+    { label: "Date", value: "date" },
   ];
 
   const handleSortByChange = (value) => {
