@@ -6,7 +6,7 @@ import RecipeCard from "../components/RecipeCard";
 import SearchBar from "../components/SearchBar";
 import AdvancedFiltering from "../components/AdvancedFiltering";
 import { fetchRecipes } from "../../lib/api";
-import Sort from "../components/Sort";
+import Sort from "../components/sort";
 import { useSearchParams } from "next/navigation";
 
 const generateMockRating = () => (Math.random() * 4 + 1).toFixed(1);
