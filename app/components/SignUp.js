@@ -117,6 +117,7 @@ export default function SignUp() {
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-200"
+            aria-label={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"} // Accessible label
           >
             Sign Up
           </button>

@@ -3,10 +3,8 @@ import Image from "next/image";
 import { Clock, Users } from "lucide-react";
 import { Card, CardContent } from "../../components/ui/card";
 import RecipeReviews from "../../components/RecipeReviews";
+import ReadInstructionsButton from "../../components/ReadInstructionsButton";
 
-/**
- * The RecipeDetail component fetches and displays a specific recipe based on its ID.
- */
 export default async function RecipeDetail({ params }) {
   const { id } = params;
   let recipe;
@@ -53,14 +51,12 @@ export default async function RecipeDetail({ params }) {
     images,
     ingredients,
     instructions,
-    nutrition,
+    nutrition, // Added for nutritional data
   } = recipe;
 
   const totalTime = (prep || 0) + (cook || 0);
 
-  const formatTime = (timeInMinutes) => {
-    return `${timeInMinutes} mins`;
-  };
+  const formatTime = (timeInMinutes) => `${timeInMinutes} mins`;
 
   return (
     <main className="container mx-auto p-4 max-w-4xl">
@@ -69,10 +65,11 @@ export default async function RecipeDetail({ params }) {
         <h1 className="text-3xl font-bold">{title}</h1>
         <a
           href="/recipe"
-          className="mt-4 block text-center text-white bg-brown rounded-full px-4 py-2 hover:bg-green-800 transition duration-200"
+          className="mt-4 block text-center text-white bg-brown rounded-full px-4 py-2 hover:bg-peach transition duration-200"
         >
           Back to Home
         </a>
+        <ReadInstructionsButton instructions={instructions} />
       </div>
 
       {/* Tags */}
@@ -95,7 +92,6 @@ export default async function RecipeDetail({ params }) {
 
       {/* Recipe Overview */}
       <div className="flex flex-wrap gap-6 mb-6">
-        {/* Time and Servings */}
         {prep !== undefined && (
           <div className="flex items-center gap-2">
             <Clock className="w-5 h-5 text-gray-600" />
@@ -141,24 +137,9 @@ export default async function RecipeDetail({ params }) {
             className="w-full h-[400px] object-cover rounded-lg mb-4"
             priority
           />
-          {images.length > 1 && (
-            <div className="grid grid-cols-4 gap-4">
-              {images.slice(1).map((image, index) => (
-                <Image
-                  key={index}
-                  src={image}
-                  alt={`${title} ${index + 2}`}
-                  width={200}
-                  height={200}
-                  className="w-full h-32 object-cover rounded-lg"
-                />
-              ))}
-            </div>
-          )}
         </div>
       )}
 
-      {/* Content */}
       <div className="grid md:grid-cols-2 gap-8">
         {/* Ingredients */}
         <Card>
@@ -204,6 +185,46 @@ export default async function RecipeDetail({ params }) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Nutritional Information */}
+      {nutrition && (
+        <Card className="mt-8">
+          <CardContent className="pt-6">
+            <h2 className="text-2xl font-semibold mb-4">
+              Nutritional Information
+            </h2>
+            <ul className="space-y-2">
+              {Object.entries(nutrition).map(([key, value]) => {
+                // Define units for common nutritional values in South Africa
+                const units = {
+                  energy: "kJ", // South African labels typically use kilojoules
+                  calories: "kcal", // Optional, if dual-labeling is desired
+                  protein: "g",
+                  fat: "g",
+                  saturated: "g", 
+                  carbohydrates: "g",
+                  sugar: "g",
+                  fiber: "g",
+                  sodium: "mg",
+                  cholesterol: "mg",
+                };
+
+                // Use the unit if defined, otherwise no unit
+                const unit = units[key.toLowerCase()] || "";
+
+                return (
+                  <li key={key} className="flex justify-between text-gray-700">
+                    <span className="capitalize">{key}</span>
+                    <span className="font-medium">
+                      {value} {unit}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Reviews */}
       {id ? (

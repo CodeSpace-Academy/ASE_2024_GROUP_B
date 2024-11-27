@@ -52,6 +52,18 @@ export async function POST(req) {
       JWT_SECRET, // Secret key
       { expiresIn: "1h" } // Token expiration
     );
+
+
+  // Set token as an HTTP-only cookie
+  const cookieOptions = {
+    httpOnly: true,  // Prevents JavaScript from accessing the cookie
+    secure: process.env.NODE_ENV === "production", // Only use cookies over HTTPS
+    maxAge: 60 * 60 * 1000, // 1 hour
+    sameSite: "Strict", // Helps prevent CSRF attacks
+    path: "/", // Cookie is accessible throughout the entire app
+  };
+
+
   
     // If authentication is successful, respond with user details or a success message
 
@@ -62,7 +74,10 @@ export async function POST(req) {
         userId: user._id,
         email: user.email,
       }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
+      { status: 200, headers: { "Content-Type": "application/json" ,
+      "Set-Cookie": `token=${token}; ${Object.entries(cookieOptions).map(([key, value]) => `${key}=${value}`).join('; ')}`
+      }
+     }
     );
   } catch (error) {
     // Handle any unexpected errors

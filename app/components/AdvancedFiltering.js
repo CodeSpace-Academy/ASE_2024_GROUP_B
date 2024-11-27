@@ -110,7 +110,8 @@ export default function AdvancedFiltering({
         <div className="flex justify-between mb-4">
           <button
             onClick={handleClearAllFilters}
-            className="mt-4 block text-center text-white bg-red-700 rounded-full px-4 py-2 text-sm font-medium hover:bg-red-600 focus:outline-none transition duration-200 ease-in-out shadow-md hover:shadow-lg"
+            className="mt-4 block text-center text-white bg-red-700 dark:bg-red-500 dark:text-gray-100 rounded-full px-4 py-2 text-sm font-medium hover:bg-red-600 dark:hover:bg-red-400 focus:outline-none transition duration-200 ease-in-out shadow-md hover:shadow-lg"
+
           >
             Clear All Filters
           </button>
@@ -147,7 +148,7 @@ export default function AdvancedFiltering({
               {localSelectedTags.length > 0 && (
                 <button
                   onClick={handleClearTags}
-                  className="mt-4 block text-center text-white bg-red-700 rounded-full px-4 py-2 text-sm font-medium hover:bg-red-600 focus:outline-none transition duration-200 ease-in-out shadow-md hover:shadow-lg"
+                  className="mt-4 block text-center text-black bg-gray-700 rounded-full px-4 py-2 text-sm font-medium hover:bg-red-600 focus:outline-none transition duration-200 ease-in-out shadow-md hover:shadow-lg"
                 >
                   Clear All Tags
                 </button>
