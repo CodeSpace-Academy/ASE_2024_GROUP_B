@@ -39,6 +39,18 @@ export default async function RecipePage({ searchParams }) {
   const noRecipesFound =
     recipes.length === 0 && searchParams.steps && searchParams.steps !== "";
 
+  // Construct the query string for pagination links, including filters
+  const queryString = (page) => {
+    const params = new URLSearchParams({
+      page: page,
+      search: searchParams.search || "",
+      category: searchParams.category || "",
+      tags: searchParams.tags || "",
+      steps: searchParams.steps || "",
+    });
+    return `?${params.toString()}`;
+  };
+
   return (
     <main>
       <div className="flex justify-between items-center mb-8">
@@ -98,9 +110,7 @@ export default async function RecipePage({ searchParams }) {
       {/* Pagination */}
       <div className="flex justify-center mt-8 items-center">
         <Link
-          href={`/recipe?page=${currentPage - 1}&search=${
-            searchParams.search || ""
-          }&category=${searchParams.category || ""}`}
+          href={queryString(currentPage - 1)}
           className={`w-10 h-10 flex items-center justify-center rounded-full text-white ${
             currentPage === 1
               ? "bg-gray-300 pointer-events-none opacity-50"
@@ -117,9 +127,7 @@ export default async function RecipePage({ searchParams }) {
         </span>
 
         <Link
-          href={`/recipe?page=${currentPage + 1}&search=${
-            searchParams.search || ""
-          }&category=${searchParams.category || ""}`}
+          href={queryString(currentPage + 1)}
           className="w-10 h-10 flex items-center justify-center rounded-full text-white bg-orange-500 hover:bg-orange-600"
           aria-label="Next page"
           title="Next page"
