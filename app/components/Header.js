@@ -21,21 +21,15 @@ const Header = () => {
           <Link href="/">
             <div className="h-10 cursor-pointer">
               <Image
-                src="/ArejengLogo.png"
+                src="/ArejengLogo-removebg-preview.png edited.png"
                 alt="Logo"
-                width={40}
-                height={40}
+                width={1000}
+                height={1000}
                 className="h-full w-auto"
               />
             </div>
           </Link>
-          <Link href="/">
-            <h1 className="text-[var(--header-text)] text-xl md:text-2xl font-bold">
-              Arejeng
-            </h1>
-          </Link>
         </div>
-
         {/* Navigation Links */}
         <nav className="hidden md:flex items-center space-x-6">
           <Link href="/recipe">

@@ -41,11 +41,11 @@ export default async function RecipePage({ searchParams }) {
 
   return (
     <main>
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-6">
         <div className="flex-1 flex justify-center">
           <SearchBar />
         </div>
-        <div className="ml-4 flex items-center mt-6">
+        <div className="ml-2 flex items-center mt-6">
           <AdvancedFiltering
             selectedCategory={searchParams.category}
             selectedSteps={searchParams.steps}
