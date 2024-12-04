@@ -103,25 +103,18 @@ export async function GET(req) {
   }
 }
 
-// Update or add items to a shopping list
+// Update or add items to a shopping list, including marking items as purchased
 export async function PUT(req) {
   try {
     const dbClient = await clientPromise;
     const db = dbClient.db("devdb");
     const shoppingLists = db.collection("shopping_lists");
 
-    const { userId, items, append } = await req.json();
+    const { userId, items, append, markPurchased } = await req.json();
 
-    if (
-      !userId ||
-      !Array.isArray(items) ||
-      items.length === 0 ||
-      items.some((item) => !item.name)
-    ) {
+    if (!userId || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
-        {
-          message: "Invalid input data. Each item must have a 'name'.",
-        },
+        { message: "Invalid input data. 'userId' and 'items' are required." },
         { status: 400 }
       );
     }
@@ -134,7 +127,35 @@ export async function PUT(req) {
       );
     }
 
-    if (append) {
+    if (markPurchased) {
+      // Mark items as purchased
+      const updates = items.map((item) => ({
+        name: item.name.trim().toLowerCase(),
+        purchased: item.purchased,
+      }));
+
+      const bulkOps = updates.map((update) => ({
+        updateOne: {
+          filter: { userId, "items.name": update.name },
+          update: { $set: { "items.$.purchased": update.purchased } },
+        },
+      }));
+
+      const result = await shoppingLists.bulkWrite(bulkOps);
+
+      if (result.modifiedCount === 0) {
+        return NextResponse.json(
+          { message: "No items were updated. Please check the item names." },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(
+        { message: "Items marked as purchased successfully." },
+        { status: 200 }
+      );
+    } else if (append) {
+      // Append new items
       const newItems = items.map((item) => ({
         name: item.name.trim().toLowerCase(),
         quantity: item.quantity || 1,
@@ -173,6 +194,7 @@ export async function PUT(req) {
         { status: 200 }
       );
     } else {
+      // Replace items in the shopping list
       const updatedItems = items.map((item) => ({
         name: item.name.trim().toLowerCase(),
         quantity: item.quantity || 1,

@@ -67,7 +67,6 @@ export default async function RecipeDetail({ params }) {
     ingredients,
     instructions,
     nutrition,
-
   } = recipe;
 
   const totalTime = (prep || 0) + (cook || 0);
@@ -190,7 +189,10 @@ export default async function RecipeDetail({ params }) {
           </CardContent>
         </Card>
 
-        <Card className="shadow-lg rounded-lg border border-gray-200" id="instructions-section">
+        <Card
+          className="shadow-lg rounded-lg border border-gray-200"
+          id="instructions-section"
+        >
           <div className="flex justify-end px-6 pt-4">
             <ReadInstructionsButton instructions={instructions} />
           </div>
@@ -199,7 +201,6 @@ export default async function RecipeDetail({ params }) {
               Instructions
             </h2>
 
-            
             <ol className="space-y-4">
               {instructions.length > 0 ? (
                 instructions.map((step, index) => (
@@ -261,7 +262,6 @@ export default async function RecipeDetail({ params }) {
             </ul>
           </CardContent>
         </Card>
-
       )}
 
       {/* Reviews */}
@@ -270,8 +270,6 @@ export default async function RecipeDetail({ params }) {
       ) : (
         <p className="text-red-500">Loading recipe ID...</p>
       )}
-
-      {id && <RecipeReviews recipeId={id} />}
     </main>
   );
 }
