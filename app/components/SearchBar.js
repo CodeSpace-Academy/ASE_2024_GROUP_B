@@ -165,7 +165,7 @@ const SearchBar = () => {
               <div
                 key={suggestion._id}
                 onClick={() => handleSuggestionClick(suggestion.title)}
-                className="px-4 py-2 cursor-pointer hover:bg-[var(--dropdown-hover-bg)] text-[var(--dropdown-text)]"
+                className="px-6 py-4 cursor-pointer hover:bg-[var(--dropdown-hover-bg whit)] text-[var(--dropdown-text)]"
               >
                 {suggestion.title}
               </div>
