@@ -1,92 +1,102 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { fetchRecipes } from "../lib/api";
 import Loading from "./loading";
 
 const generateMockRating = () => {
-  // Generate a random rating between 1 and 5
-  return (Math.random() * 4 + 1).toFixed(1); // Random number between 1 and 5 with one decimal point
+  return (Math.random() * 4 + 1).toFixed(1);
 };
 
 export default function Home({ searchParams }) {
   const [recommendedRecipes, setRecommendedRecipes] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Fetch recipes on load
     const fetchHighRatedRecipes = async () => {
-      const data = await fetchRecipes(
-        1, // Page 1 to get the first set of recipes
-        100, // Get a large number of recipes to filter top-rated ones
-        "",
-        "",
-        [],
-        ""
-      );
-      
-      // Sort recipes by rating (mocked rating)
-      const highRatedRecipes = data
-        .map((recipe) => ({
-          ...recipe,
-          rating: generateMockRating(), // Add mock rating to each recipe
-        }))
-        .sort((a, b) => b.rating - a.rating) // Sort by highest rating
-        .slice(0, 10); // Get top 10 or fewer recipes
-      
-      setRecommendedRecipes(highRatedRecipes);
+      try {
+        const data = await fetchRecipes(1, 100, "", "", [], "");
+        const highRatedRecipes = data
+          .map((recipe) => ({
+            ...recipe,
+            rating: generateMockRating(),
+          }))
+          .sort((a, b) => b.rating - a.rating)
+          .slice(0, 10);
+
+        setRecommendedRecipes(highRatedRecipes);
+      } catch (error) {
+        console.error("Error fetching recipes:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchHighRatedRecipes();
   }, []);
 
   return (
-    <main>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-center mb-8">Recommended Recipes</h1>
-      </div>
+    <main
+      className="relative min-h-screen bg-cover bg-center"
+      style={{
+        backgroundImage: "url('/background.jpg')",
+      }}
+    >
+      {/* Overlay for better text readability */}
+      <div className="absolute inset-0 bg-black/30"></div>
 
-      {/* Carousel of Recommended Recipes */}
-      <div className="relative mb-8">
-        <div className="carousel-container overflow-hidden relative">
-          <div className="carousel flex space-x-4">
-            {recommendedRecipes.length > 0 ? (
-              recommendedRecipes.map((recipe) => (
-                <div
-                  key={recipe._id}
-                  className="carousel-item bg-white p-4 rounded-lg shadow-md w-80"
-                >
-                  {/* Recipe Card */}
-                  <image
-                    src={recipe.image || "/default-image.jpg"}
-                    alt={recipe.title}
-                    className="w-full h-48 object-cover rounded-lg mb-4"
-                  />
-                  <h3 className="text-xl font-semibold">{recipe.title}</h3>
-                  <div className="flex items-center mt-2">
-                    <span className="text-orange-500 font-semibold">
-                      Rating: {recipe.rating} / 5
-                    </span>
-                  </div>
-                  <Link href={`/recipes/${recipe._id}`} passHref>
-                    <button className="mt-4 w-full py-2 bg-orange-500 text-white rounded-md">
-                      View Recipe
-                    </button>
-                  </Link>
-                </div>
-              ))
+      <div className="relative z-10 text-center text-white py-12 px-4">
+        <header className="mb-8">
+          <h1 className="text-4xl font-bold">Welcome to Recipe Paradise!</h1>
+          <p className="text-lg mt-2">
+            Explore top-rated recipes curated just for you.
+          </p>
+        </header>
+
+        <section>
+          <h2 className="text-2xl font-semibold mb-6">Recommended Recipes</h2>
+
+          {/* Carousel */}
+          <div className="relative">
+            {isLoading ? (
+              <Loading />
             ) : (
-              < Loading/>
+              <div className="carousel-container flex overflow-x-scroll space-x-6 scrollbar-hide">
+                {recommendedRecipes.map((recipe) => (
+                  <div
+                    key={recipe._id}
+                    className="bg-white/80 p-4 rounded-lg shadow-md flex-shrink-0 w-72 flex flex-col"
+                  >
+                    <Image
+                      src={recipe.images[0] || "/default-image.jpg"} // Ensure fallback
+                      alt={recipe.title}
+                      width={288} // Matches w-72 (72 * 4px = 288px)
+                      height={192} // Matches h-48 (48 * 4px = 192px)
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                    <h3 className="text-xl font-semibold mt-4 text-gray-900 text-center">
+                      {recipe.title}
+                    </h3>
+                    <p className="text-orange-500 mt-2 text-center">
+                      Rating: {recipe.rating} / 5
+                    </p>
+
+                    {/* Push button to the bottom */}
+                    <div className="mt-auto">
+                      <Link href={`/recipes/${recipe._id}`} passHref>
+                        <button className="w-full py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">
+                          View Recipe
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
-        </div>
-        
-        {/* Add navigation arrows for carousel */}
-        <div className="absolute top-1/2 left-4 transform -translate-y-1/2 text-white cursor-pointer">
-          ←
-        </div>
-        <div className="absolute top-1/2 right-4 transform -translate-y-1/2 text-white cursor-pointer">
-          →
-        </div>
+        </section>
       </div>
     </main>
   );

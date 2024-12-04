@@ -2,15 +2,22 @@ import { jwtVerify } from "jose";
 import { NextResponse } from "next/server";
 
 /**
- * Middleware to handle JWT token verification using jose.
+ * Middleware to handle JWT verification and route protection.
+ * 
+ * @async
+ * @function middleware
+ * @param {Request} req - The incoming HTTP request object.
+ * @returns {Promise<NextResponse>} - Proceeds to the next middleware or redirects to login.
  */
 export async function middleware(req) {
   // Retrieve the token from cookies
   const token = req.cookies.get("token");
-
+  
   if (!token) {
-    console.log("No token found in cookies.");
-    return new Response("Unauthorized: No token found", { status: 401 });
+    // Redirect to login if the token is missing
+    const redirectUrl = new URL("/login", req.url);
+    redirectUrl.searchParams.set("redirectTo", req.nextUrl.pathname);
+    return NextResponse.redirect(redirectUrl);
   }
 
   try {
@@ -18,19 +25,33 @@ export async function middleware(req) {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const { payload } = await jwtVerify(token.value, secret);
 
-    // Attach the decoded user information to the request object
-    req.user = payload;
-    console.log("Token verified", payload);
+    // Attach user data to headers
+    const newHeaders = new Headers(req.headers);
+    newHeaders.set("x-user", JSON.stringify(payload));
 
-    // Proceed with the request
-    return NextResponse.next();
+    // Proceed to the next middleware or route handler
+    return NextResponse.next({
+      request: {
+        headers: newHeaders,
+      },
+    });
   } catch (error) {
-    console.log("Token verification failed:", error.message);
-    return new Response("Unauthorized: Invalid token", { status: 401 });
+    console.error("JWT Verification Error:", error.message);
+
+    // Redirect to login for invalid tokens
+    const redirectUrl = new URL("/login", req.url);
+    redirectUrl.searchParams.set("redirectTo", req.nextUrl.pathname);
+    return NextResponse.redirect(redirectUrl);
   }
 }
 
-// Apply the middleware only to specific routes
+/**
+ * Specifies which routes the middleware applies to.
+ * 
+ * @constant
+ * @type {Object}
+ * @property {Array<string>} matcher - Array of route patterns requiring authentication.
+ */
 export const config = {
-  matcher: ["/api/test"],
+  matcher: ["/favourites"], // Add routes requiring authentication
 };

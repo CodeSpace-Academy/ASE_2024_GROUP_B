@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 
 /**
@@ -12,9 +13,11 @@ export default function Login() {
   const [email, setEmail] = useState(""); // State for email input
   const [password, setPassword] = useState(""); // State for password input
   const [error, setError] = useState(""); // State for error messages
-  const [success, setSuccess] = useState(""); // State for success messages
-  const [loading, setLoading] = useState(false); // State to manage the loading indicator
+  const [loading, setLoading] = useState(false); // State for loading indicator
   const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo") || "/"; // Default to home if no redirect specified
 
   /**
    * Handles form submission and sends data to the backend.
@@ -24,38 +27,33 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
-    setLoading(true); // Show loading indicator
+    setLoading(true); // Start loading indicator
 
     // Validation
     if (!email || !password) {
       setError("Both fields are required.");
-      setLoading(false); // Stop loading
+      setLoading(false);
       return;
     }
 
     try {
       const response = await fetch("/api/authorisation/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
-      setLoading(false); // Stop loading
-      if (response.status === 200) {
+      if (!response.ok) {
         const data = await response.json();
-        setSuccess("Login successful!");
-        setEmail("");
-        setPassword("");
-      } else {
-        const errorData = await response.json();
-        setError(errorData.error || "Invalid email or password. Please try again.");
+        throw new Error(data.message || "Login failed");
       }
+
+      // Redirect to the intended page after successful login
+      router.push(`${process.env.NEXT_PUBLIC_BASE_URL}/${redirectTo}`);
     } catch (err) {
-      setLoading(false); // Stop loading
-      setError("Failed to connect to the server. Please check your network and try again.");
+      setError(err.message || "Unexpected error occurred.");
+    } finally {
+      setLoading(false); // Stop loading indicator
     }
   };
 
@@ -66,7 +64,6 @@ export default function Login() {
           Log In
         </h1>
         {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
-        {success && <p className="text-sm text-green-600 mb-4">{success}</p>}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -108,9 +105,9 @@ export default function Login() {
             className={`w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-200 ${
               loading ? "opacity-50 cursor-not-allowed" : ""
             }`}
-            disabled={loading} // Disable button while loading
+            disabled={loading}
           >
-            {loading ? "Logging you in..." : "Log In"}
+            {loading ? "Logging in..." : "Log In"}
           </button>
         </form>
         <p className="text-center text-sm text-gray-500 mt-4">

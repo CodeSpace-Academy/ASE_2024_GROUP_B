@@ -1,4 +1,5 @@
 import clientPromise from "../../../lib/mongodb";
+import { decode } from "he"; // Use the 'he' library to decode HTML entities
 
 /**
  * API route handler for fetching all unique ingredients from the database.
@@ -16,10 +17,11 @@ export async function GET() {
     // Aggregation query to get unique ingredient keys directly from the database
     const ingredientsList = await db.collection("recipes")
       .aggregate([
-        { $project: { ingredients: { $objectToArray: "$ingredients" } } }, // Convert ingredients object to array of key-value pairs
-        { $unwind: "$ingredients" }, // Unwind the array of ingredients
-        { $group: { _id: "$ingredients.k" } }, // Group by the ingredient key (ingredient name)
-        { $project: { _id: 0, ingredient: "$_id" } } // Format the output
+        { $project: { ingredients: { $objectToArray: "$ingredients" } } },
+        { $unwind: "$ingredients" },
+        { $group: { _id: "$ingredients.k" } },
+        { $sort: { _id: 1 } }, // Sort by ingredient name
+        { $project: { _id: 0, ingredient: "$_id" } }
       ])
       .toArray();
 
@@ -30,8 +32,21 @@ export async function GET() {
       );
     }
 
+    // Decode HTML entities and clean escaped quotes
+    const decodedIngredients = ingredientsList.map(i => {
+      let ingredient = decode(i.ingredient); // Decode HTML entities
+      try {
+        // Try parsing the ingredient to remove escaped characters (e.g., \" becomes ")
+        ingredient = JSON.parse(`"${ingredient}"`);
+      } catch (e) {
+        // If JSON parsing fails, just return the original ingredient
+        console.error("Error parsing ingredient:", e);
+      }
+      return ingredient;
+    });
+
     return new Response(
-      JSON.stringify({ success: true, ingredients: ingredientsList.map(i => i.ingredient) }),
+      JSON.stringify({ success: true, ingredients: decodedIngredients }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {
