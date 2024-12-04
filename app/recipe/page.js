@@ -56,8 +56,6 @@ export default async function RecipePage({ searchParams }) {
         </div>
       </div>
 
-      <h1 className="text-2xl font-bold text-center mb-8">Recipes</h1>
-
       {/* Display filters applied */}
       <div className="text-center mb-4">
         {searchParams.search && (
