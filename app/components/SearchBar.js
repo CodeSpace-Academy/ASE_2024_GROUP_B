@@ -159,7 +159,7 @@ const SearchBar = () => {
 
       {/* Auto-suggestions Dropdown */}
       {showSuggestions && (
-        <div className="absolute top-full mt-1 w-full max-w-lg bg-gray-50 border border-white-200 rounded-md z-10">
+        <div className="absolute top-full mt-1 w-full max-w-lg bg-gray-50 border border-black-300 rounded-md z-50">
           {suggestions.length > 0 ? (
             suggestions.map((suggestion) => (
               <div
