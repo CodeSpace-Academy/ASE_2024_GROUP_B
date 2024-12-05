@@ -18,7 +18,7 @@ export default function Home({ searchParams }) {
     const fetchHighRatedRecipes = async () => {
       try {
         const data = await fetchRecipes(1, 100, "", "", [], "");
-        const highRatedRecipes = data
+        const highRatedRecipes = data.recipes
           .map((recipe) => ({
             ...recipe,
             rating: generateMockRating(),

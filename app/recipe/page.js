@@ -1,8 +1,8 @@
 import Link from "next/link";
+import { fetchRecipes } from "../../lib/api";
+import AdvancedFiltering from "../components/AdvancedFiltering";
 import RecipeCard from "../components/RecipeCard";
 import SearchBar from "../components/SearchBar";
-import AdvancedFiltering from "../components/AdvancedFiltering";
-import { fetchRecipes } from "../../lib/api";
 
 /**
  * Recipe Page that fetches and displays a list of recipes with pagination and filters.
@@ -34,7 +34,8 @@ export default async function RecipePage({ searchParams }) {
     searchParamsToInclude.selectedSteps
   );
 
-  const recipes = Array.isArray(data) ? data : [];
+  const recipes = Array.isArray(data.recipes) ? data.recipes : [];
+  const totalCount = data.totalMatches || 0;
   const noRecipesFound =
     recipes.length === 0 && searchParams.steps && searchParams.steps !== "";
     const noRecipesFoundInSearch =
@@ -62,6 +63,15 @@ export default async function RecipePage({ searchParams }) {
             </span>
           </span>
         )}
+
+        {searchParams.search && (
+          <span className="text-md font-semibold">
+            Search Total:{" "}
+            <span className="px-2 py-1 bg-gray-200 rounded-full text-gray-700">
+              {totalCount}
+            </span>
+          </span>
+        )}
         {searchParams.steps && (
           <span className="text-md font-semibold ml-4">
             Steps:{" "}
@@ -72,14 +82,13 @@ export default async function RecipePage({ searchParams }) {
         )}
       </div>
 
-      {/* No recipes found message */}
-      {noRecipesFound && (
+       {/* No recipes found message */}
+       {noRecipesFound && (
         <p className="text-center text-lg text-red-500 mb-8">
           No recipes found with the specified number of steps.
         </p>
       )}
-
-
+      
       {/* No recipes found message in search */}
       {noRecipesFoundInSearch && (
         <p className="text-center text-lg text-red-500 mb-8">

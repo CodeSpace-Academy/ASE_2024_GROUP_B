@@ -3,16 +3,27 @@ import { NextResponse } from "next/server";
 
 /**
  * Middleware to handle JWT verification and route protection.
- * 
+ *
  * @async
  * @function middleware
  * @param {Request} req - The incoming HTTP request object.
  * @returns {Promise<NextResponse>} - Proceeds to the next middleware or redirects to login.
  */
 export async function middleware(req) {
+  console.log("Intercepted path:", req.nextUrl.pathname);
+  const url = req.nextUrl;
+
+  // Exclude static files (served directly from the public folder)
+  if (
+    url.pathname.startsWith("/_next") || // Built assets
+    url.pathname.match(/\.(png|jpg|jpeg|gif|svg|ico|webp)$/) // Image files
+  ) {
+    return NextResponse.next();
+  }
+
   // Retrieve the token from cookies
   const token = req.cookies.get("token");
-  
+
   if (!token) {
     // Redirect to login if the token is missing
     const redirectUrl = new URL("/login", req.url);
@@ -47,7 +58,7 @@ export async function middleware(req) {
 
 /**
  * Specifies which routes the middleware applies to.
- * 
+ *
  * @constant
  * @type {Object}
  * @property {Array<string>} matcher - Array of route patterns requiring authentication.

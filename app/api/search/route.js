@@ -9,14 +9,14 @@ import clientPromise from "../../../lib/mongodb";
 export async function GET(req) {
   try {
     const url = new URL(req.url);
-    const searchTerm = url.searchParams.get('searchTerm');
-    const page = parseInt(url.searchParams.get('page') || "1", 10);
-    const limit = parseInt(url.searchParams.get('limit') || "20", 10);
+    const searchTerm = url.searchParams.get("searchTerm");
+    const page = parseInt(url.searchParams.get("page") || "1", 10);
+    const limit = parseInt(url.searchParams.get("limit") || "20", 10);
 
     if (!searchTerm) {
       return new Response(
         JSON.stringify({ success: false, error: "Search term is required" }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -26,38 +26,60 @@ export async function GET(req) {
     // Calculate the number of documents to skip based on the page and limit
     const skip = (page - 1) * limit;
 
+    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+
     /**
      * @description Executes a full-text search for the specified searchTerm.
      * @type {Promise<Array<Object>>} - Promise resolving to an array of matching recipes from the full-text search.
      */
-    const textSearchPromise = db.collection("recipes")
-      .find({ $text: { $search: searchTerm } })
+
+    const textSearchPromise = db
+      .collection("recipes")
+      .find({ $text: { $search: normalizedSearchTerm } })
       .toArray();
 
     /**
      * @description Executes a regex search on the title field for partial matches of the searchTerm, case-insensitive.
      * @type {Promise<Array<Object>>} - Promise resolving to an array of matching recipes from the regex search.
      */
-    const regexSearchPromise = db.collection("recipes")
-      .find({ title: { $regex: searchTerm, $options: 'i' } })
+    const regexSearchPromise = db
+      .collection("recipes")
+      .find({ title: { $regex: searchTerm, $options: "i" } })
       .toArray();
 
     // Await both search results
-    const [textResults, regexResults] = await Promise.all([textSearchPromise, regexSearchPromise]);
+    const [textResults, regexResults] = await Promise.all([
+      textSearchPromise,
+      regexSearchPromise,
+    ]);
 
     /**
      * @description Combines and deduplicates results from both full-text and regex searches based on unique _id values.
      * @type {Array<Object>} - Array of unique recipe objects from combined search results.
      */
-    const allResults = [...new Map([...textResults, ...regexResults].map(item => [item._id.toString(), item])).values()];
+    const allResults = [
+      ...new Map(
+        [...textResults, ...regexResults].map((item) => [
+          item._id.toString(),
+          item,
+        ])
+      ).values(),
+    ];
 
     // Checks if there are no matching results and return the required empty response
     if (allResults.length === 0) {
       return new Response(
-        JSON.stringify({ success: true, message: "No matches found", results: [], total: 0, page, limit }),
+        JSON.stringify({
+          success: true,
+          message: "No matches found",
+          results: [],
+          total: 0,
+          page,
+          limit,
+        }),
         {
           status: 200,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
@@ -72,25 +94,25 @@ export async function GET(req) {
         results: paginatedResults,
         total: allResults.length,
         page,
-        limit
+        limit,
       }),
       {
         status: 200,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       }
     );
-
   } catch (error) {
-    console.error('Failed to perform search:', error);
+    console.error("Failed to perform search:", error);
     return new Response(
       JSON.stringify({
         success: false,
         error: "Failed to perform search",
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        details:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
