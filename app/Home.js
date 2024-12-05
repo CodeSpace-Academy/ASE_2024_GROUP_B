@@ -47,7 +47,7 @@ export default function Home({ searchParams }) {
       {/* Overlay for better text readability */}
       <div className="absolute inset-0 bg-black/30"></div>
 
-      <div className="relative z-10 text-center text-white py-12 px-4">
+      <div className="relative z-10 text-center text-[var(--home-text)] py-12 px-4">
         <header className="mb-8">
           <h1 className="text-4xl font-bold">Welcome to Recipe Paradise!</h1>
           <p className="text-lg mt-2">
@@ -67,7 +67,7 @@ export default function Home({ searchParams }) {
                 {recommendedRecipes.map((recipe) => (
                   <div
                     key={recipe._id}
-                    className="bg-white/80 p-4 rounded-lg shadow-md flex-shrink-0 w-72 flex flex-col"
+                    className="bg-[var(--recipe-bg)] p-4 rounded-lg shadow-md flex-shrink-0 w-72 flex flex-col"
                   >
                     <Image
                       src={recipe.images[0] || "/default-image.jpg"} // Ensure fallback
@@ -76,17 +76,17 @@ export default function Home({ searchParams }) {
                       height={192} // Matches h-48 (48 * 4px = 192px)
                       className="w-full h-48 object-cover rounded-lg"
                     />
-                    <h3 className="text-xl font-semibold mt-4 text-gray-900 text-center">
+                    <h3 className="text-xl font-semibold mt-4 text-[var(--recipe-title-text)] text-center">
                       {recipe.title}
                     </h3>
-                    <p className="text-orange-500 mt-2 text-center">
+                    <p className="text-[var(--rating-bg)] mt-2 text-center">
                       Rating: {recipe.rating} / 5
                     </p>
 
                     {/* Push button to the bottom */}
                     <div className="mt-auto">
                       <Link href={`/recipes/${recipe._id}`} passHref>
-                        <button className="w-full py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">
+                        <button className="w-full py-2 bg-[var(--viewRecipe-bg)] text-[var(--home-text)] rounded-md hover:bg-[var(--button-hover)]">
                           View Recipe
                         </button>
                       </Link>

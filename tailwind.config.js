@@ -1,4 +1,4 @@
-/** @type {import('tailwindcss').Config} */
+/** @type {import('A6Btailwindcss').Config} */
 module.exports = {
   darkMode: 'class', // Enable class-based dark mode
   content: [
@@ -11,8 +11,7 @@ module.exports = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-        peach: "#FFDAB9",
-        brown: "#5C4033",
+       
       },
     },
   },

@@ -172,7 +172,7 @@ export default function AdvancedFiltering({
                 {localSelectedTags.length > 0 && (
                   <button
                     onClick={handleClearTags}
-                    className="mt-4 block text-center bg-gray-700 text-[var(--button-text)] rounded-full px-4 py-2 text-sm font-medium hover:bg-red-600 focus:outline-none transition duration-200 ease-in-out shadow-md hover:shadow-lg"
+                    className="mt-4 block text-center bg-[var(--button-bg)] text-[var(--button-text)] rounded-full px-4 py-2 text-sm font-medium hover:bg-red-600 focus:outline-none transition duration-200 ease-in-out shadow-md hover:shadow-lg"
                   >
                     Clear All Tags
                   </button>

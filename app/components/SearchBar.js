@@ -133,8 +133,6 @@ const SearchBar = () => {
       if (searchCategoryQuery && searchCategoryQuery.trim() !== "") {
         url += `&category=${encodeURIComponent(searchCategoryQuery)}`;
       }
-
-      // setIsLoading(true); // Set loading to true when search starts
       // Redirect to the new URL with updated search parameters
       router.push(url);
     }
@@ -156,6 +154,12 @@ const SearchBar = () => {
         onChange={handleInputChange}
         className="w-full px-4 py-2 text-lg text-[var(--button-bg)] placeholder-[var(--button-bg)]  bg-transparent border-b-2 border-[var(--header-bg)]  focus:outline-none focus:ring-0"
       />
+
+      {isLoading && (
+        <div className="absolute top-1/2 right-4 transform -translate-y-1/2">
+          <div className="w-5 h-5 border-2 border-t-transparent border-[var(--highlight)] rounded-full animate-spin"></div>
+        </div>
+      )}
 
       {/* Auto-suggestions Dropdown */}
       {showSuggestions && (

@@ -4,40 +4,50 @@
 @tailwind utilities;
 
 :root {
-  --background: #f9f9f9;
+  --background: #F1E9D2;
   --foreground: #171717;
-  --card-bg: #ffffff;
-  --hover-shadow: #aa8094;
-  --button-bg: #3adee4; 
+  --card-bg: #FFF5E1;
+  --hover-shadow: #D2B48C;
+  --button-bg: #D2B48C; 
   --button-text: #171717;
-  --button-hover-bg: #e5e7eb;
+  --button-hover-bg: #D2B48C;
   --button-hover-text: #171717;
-  --button-active-bg: #00bcd4;
+  --button-active-bg: #ffdab9;
   --button-active-text: #171717;
-  --header-bg: #aa8094;
+  --header-bg: #A67B5B;
   --filter-bg: #ffffff;
-  --filter-border: #d1d5db;
+  --filter-border: #000000;
   --filter-text: #171717;
-  --filter-header-bg: #f3f4f6;
+  --filter-header-bg: #ffdab9;
   --filter-header-text: #171717;
-  --tag-bg: #e5e7eb;
+  --tag-bg: #D2B48C;
   --tag-text: #171717;
   --tag-hover-bg: #d1d5db;
   --tag-hover-text: #171717;
   --icon-color: #333333;
-  --primary: #1f2937; /* Text color for light theme */
-  --secondary: #374151; /* Subtle text color for light theme */
-  --highlight: #14b8a6; /* Accent color for light theme */
-  --button: #14b8a6; /* Button background for light theme */
+  --primary: #F4A261; /* Text color for light theme */
+  --secondary: #2A9D8F; /* Subtle text color for light theme */
+  --highlight: #D2B48C; /* Accent color for light theme */
+  --button: #D2B48C; /* Button background for light theme */
   --filter-label: #333; /* dark text for light theme */
   --filter-placeholder: #999; /* gray placeholder text */
-  --button-hover: #ffdab9; /* Peach hover background */
+  --button-hover: #E9C89B; /* Peach hover background */
   --svg-fill-light: #000; /* Black for light theme */
   --button-text-color: Black; /* White text for light mode */
-  --button-bg-color: #00bcd4; /* Brown background for light mode */
-  --button-hover-bg-color: #00cdc1; /* Darker brown for hover effect */
-  --error-text: #e53e3e;
-  --success-text: #38a169;
+  --button-bg-color: #D2B48C; /* Brown background for light mode */
+  --button-hover-bg-color: #F1E9D2; /* Darker brown for hover effect */
+  --error-text: #E76F51;
+  --success-text: #49a976;
+  --home-text: #ffffff;
+  --recipe-bg:#FFF8E7;
+  --recipe-title-text: #000000;
+  --button-hover: #d2af93;
+   /* Home style  */
+   --button1-bg: #2d2d2d;
+   --recipe-bg: #F1E9D2;
+   --rating-bg: #000000; /* Home button and rating color  */
+   --viewRecipe-bg: #A67B5B;
+   --recipe-title-text: #000000;
 }
 
 .dark {
@@ -74,10 +84,18 @@
   --button-bg-color: #666; /* Darker brown background for dark mode */
   --button-hover-bg-color: #8d8989; /* Even darker brown for hover effect */
   --card-bg: #343a40;
-  --hover-shadow: #934269 ;
+  --hover-shadow: #D2B48C ;
   --success-text: #48bb78;
   --error-text: #f56565; /* Lighter red color for error in dark mode */
+   /* Home style  */
   --button1-bg: #2d2d2d;
+  --recipe-bg: #343a40;
+  --rating-bg: #; /* Home button and rating color  */
+  --viewRecipe-bg: #9ca3af;
+  --recipe-title-text: #ffffff;
+  /* Sign up   */
+  --password-text: #ffffff;
+
 }
 
 body {

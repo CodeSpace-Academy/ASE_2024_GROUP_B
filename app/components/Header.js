@@ -1,32 +1,38 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ThemeToggle from "./ThemeToggle";
 
-const Header = () => {
+const Header = ({isDarkMode, toggleTheme }) => {
   // State to track mobile menu visibility
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  // Function to toggle menu visibility
-  const toggleMenu = () => {
-    setIsMenuOpen((prev) => !prev);
-  };
-
+  const [isMenuOpen, setIsMenuOpen] = useState(false);  
+  // Toggle menu visibility
+  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
   return (
-    <header className="glossy-highlight fixed top-0 left-0 w-full z-50 bg-[var(--header-bg)] bg-opacity-80 shadow-md backdrop-blur-lg">
+    <header className="fixed top-0 left-0 w-full z-50 bg-[var(--header-bg)] bg-opacity-80 shadow-md backdrop-blur-lg">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo Section */}
         <div className="flex items-center space-x-4">
           <Link href="/">
-            <div className="h-10 cursor-pointer">
-              <Image
-                src="/ArejengLogo-removebg-preview.png edited.png"
-                alt="Logo"
-                width={1000}
-                height={1000}
-                className="h-full w-auto"
-              />
+            <div className="h-10 cursor-pointer flex items-center">
+              {isDarkMode ? (
+                <Image
+                  src="/ArejengLogoDark.png" // Dark theme logo file
+                  alt="Logo for Dark Theme"
+                  width={120}
+                  height={120}
+                  className="h-auto w-auto"
+                />
+              ) : (
+                <Image
+                  src="/ArejengLogo.png" // Light theme logo file
+                  alt="Logo for Light Theme"
+                  width={120}
+                  height={120}
+                  className="h-auto w-auto"
+                />
+              )}
             </div>
           </Link>
         </div>
@@ -54,10 +60,12 @@ const Header = () => {
           </Link>
           <Link href="/signup">
             <button className="bg-[var(--button-bg)] px-3 py-1 rounded-full">
-              <span className="font-bold text-[var(--signup-text)]">Sign Up</span>
+              <span className="font-bold text-[var(--signup-text)]">
+                Sign Up
+              </span>
             </button>
           </Link>
-          <ThemeToggle />
+          <ThemeToggle isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
         </nav>
 
         {/* Mobile Menu Toggle */}
@@ -114,15 +122,19 @@ const Header = () => {
             </Link>
             <Link href="/login">
               <button className="bg-[var(--button-bg)] px-3 py-1 rounded-full w-full text-left">
-                <span className="font-bold text-[var(--login-text)]">Login</span>
+                <span className="font-bold text-[var(--login-text)]">
+                  Login
+                </span>
               </button>
             </Link>
             <Link href="/signup">
               <button className="bg-[var(--button-bg)] px-3 py-1 rounded-full w-full text-left">
-                <span className="font-bold text-[var(--signup-text)]">Sign Up</span>
+                <span className="font-bold text-[var(--signup-text)]">
+                  Sign Up
+                </span>
               </button>
             </Link>
-            <ThemeToggle />
+            <ThemeToggle isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
           </nav>
         </div>
       )}
