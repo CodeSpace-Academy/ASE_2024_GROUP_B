@@ -69,9 +69,9 @@ const CategoryFilter = ({ selectedCategory, setSelectedCategory }) => {
 
   return (
     <div className="flex items-center space-x-2">
-      <label 
-        htmlFor="categories" 
-        className="text-gray-700 font-bold"
+      <label
+        htmlFor="category"
+        className="text-[var(--filter-text)] font-bold"
       >
         Categories:
       </label>
@@ -79,24 +79,30 @@ const CategoryFilter = ({ selectedCategory, setSelectedCategory }) => {
         id="categories"
         value={selectedCategory || ""}
         onChange={handleChange}
-        className="px-4 py-2 border-2 border-gray-400 rounded-lg bg-white disabled:bg-gray-100"
-        disabled={isLoading}
+        className="px-4 py-2 border-2 rounded-lg bg-[var(--filter-bg)] text-[var(--filter-text)] border-[var(--filter-border)] focus:outline-none focus:ring-2 focus:ring-[var(--button-hover-bg)]"
       >
         <option value="">Default</option>
         {isLoading ? (
           <option disabled>Loading categories...</option>
         ) : categories?.length > 0 ? (
           categories.map((category) => (
-            <option key={category} value={category}>
+            <option
+              key={category}
+              value={category}
+              className="bg-[var(--filter-bg)] text-[var(--filter-text)]"
+            >
               {category}
             </option>
           ))
         ) : (
-          <option disabled>No categories available</option>
+          <option disabled className="bg-[var(--filter-bg)] text-[var(--filter-text)]">
+            No categories available
+          </option>
         )}
       </select>
     </div>
   );
-};
-
-export default CategoryFilter;
+  };
+  
+  export default CategoryFilter;
+  

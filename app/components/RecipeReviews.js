@@ -1,6 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
-
+import { useState, useEffect, useRef } from "react";
 /**
  * RecipeReviews component for displaying, submitting, editing, and deleting reviews for a specific recipe.
  *
@@ -27,9 +26,13 @@ const RecipeReviews = ({ recipeId }) => {
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(null);
 
-  /**
-   * Fetch reviews from the API when the component mounts or when recipeId changes.
-   */
+  // Feedback message
+  const [feedbackMessage, setFeedbackMessage] = useState(null);
+  const feedbackTimer = useRef(null);
+
+  // Reference for the form
+  const formRef = useRef(null);
+
   useEffect(() => {
     if (!recipeId) {
       setError("Recipe ID is missing.");
@@ -57,7 +60,24 @@ const RecipeReviews = ({ recipeId }) => {
     };
 
     fetchReviews();
+
+    return () => {
+      clearTimeout(feedbackTimer.current);
+    };
   }, [recipeId]);
+
+  /**
+   * Show feedback message temporarily.
+   *
+   * @param {string} message - The feedback message to display.
+   */
+  const showFeedbackMessage = (message) => {
+    setFeedbackMessage(message);
+    clearTimeout(feedbackTimer.current);
+    feedbackTimer.current = setTimeout(() => {
+      setFeedbackMessage(null);
+    }, 3000);
+  };
 
   /**
    * Handle the submission or editing of a review.
@@ -85,8 +105,8 @@ const RecipeReviews = ({ recipeId }) => {
         throw new Error(data.error || "Failed to submit review.");
       }
 
+      const successMessage = isEditing ? "Review updated successfully!" : "Review submitted successfully!";
       if (isEditing) {
-        // Update the edited review in the UI
         setReviews((prev) =>
           prev.map((r) =>
             r._id === editReviewId
@@ -95,14 +115,13 @@ const RecipeReviews = ({ recipeId }) => {
           )
         );
       } else {
-        // Add the new review to the list
         setReviews((prev) => [
           { _id: data.reviewId, username, date: new Date(), rating, review: reviewText },
           ...prev,
         ]);
       }
 
-      // Reset the form
+      showFeedbackMessage(successMessage);
       setUsername("");
       setReviewText("");
       setRating(5);
@@ -110,52 +129,40 @@ const RecipeReviews = ({ recipeId }) => {
       setEditReviewId(null);
     } catch (err) {
       console.error("Error submitting review:", err);
-      setError("Unable to submit review. Please try again later.");
+      showFeedbackMessage("Unable to submit review. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
   /**
-   * Handle review deletion.
+   * Delete a review by ID.
    *
    * @param {string} reviewId - The ID of the review to delete.
    */
-  const handleDelete = (reviewId) => {
-    setConfirmDelete(reviewId);
-  };
+  const handleDelete = async (reviewId) => {
+    setDeleting(true);
 
-  /**
-   * Confirm review deletion.
-   *
-   * @param {boolean} confirm - Whether the user confirms or cancels the deletion.
-   */
-  const confirmDeleteReview = async (confirm) => {
-    if (confirm && confirmDelete) {
-      setDeleting(true);
-      try {
-        const res = await fetch(`/api/reviews/${recipeId}`, {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ reviewId: confirmDelete }),
-        });
+    try {
+      const res = await fetch(`/api/reviews/${recipeId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviewId }),
+      });
 
-        const data = await res.json();
-        if (!res.ok || !data.success) {
-          throw new Error(data.error || "Failed to delete review.");
-        }
-
-        // Remove the deleted review from the UI
-        setReviews((prev) => prev.filter((r) => r._id !== confirmDelete));
-        setConfirmDelete(null); // Reset confirmation state
-      } catch (err) {
-        console.error("Error deleting review:", err);
-        setError("Unable to delete review. Please try again later.");
-      } finally {
-        setDeleting(false);
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to delete review.");
       }
-    } else {
-      setConfirmDelete(null); // Reset confirmation state if user cancels
+
+      setReviews((prev) => prev.filter((review) => review._id !== reviewId));
+      showFeedbackMessage("Review deleted successfully!");
+    } catch (err) {
+      console.error("Error deleting review:", err);
+      showFeedbackMessage("Unable to delete review. Please try again.");
+    } finally {
+      setDeleting(false);
+      setConfirmDelete(null);
     }
   };
 
@@ -163,7 +170,7 @@ const RecipeReviews = ({ recipeId }) => {
    * Initialize editing of an existing review.
    *
    * @param {Object} review - The review to be edited.
-   * @param {string} review._id - The ID of the review to be edited.
+   * * @param {string} review._id - The ID of the review to be edited.
    * @param {string} review.username - The username of the reviewer.
    * @param {string} review.review - The content of the review.
    * @param {number} review.rating - The rating given in the review.
@@ -174,18 +181,27 @@ const RecipeReviews = ({ recipeId }) => {
     setUsername(review.username);
     setReviewText(review.review);
     setRating(review.rating);
+  
+    // Scroll slightly above the review input form
+    const offset = 130; // Adjust this value as needed for the slight upward scroll
+    const formElement = formRef.current;
+    const formPosition = formElement.getBoundingClientRect().top + window.pageYOffset;
+  
+    window.scrollTo({
+      top: formPosition - offset,
+      behavior: "smooth",
+    });
   };
+  
 
-  // Render loading, error, or review UI
   if (loading) return <p>Loading reviews...</p>;
   if (error) return <p className="text-red-500">Error: {error}</p>;
 
   return (
-    <section className="mt-8">
+    <section className="mt-8 relative">
       <h2 className="text-2xl font-semibold mb-4">Reviews</h2>
 
-      {/* Review Submission/Edit Form */}
-      <form onSubmit={handleSubmit} className="mb-6">
+      <form ref={formRef} onSubmit={handleSubmit} className="mb-6">
         <div className="mb-4">
           <label className="block text-sm font-medium mb-1">Username</label>
           <input
@@ -223,11 +239,21 @@ const RecipeReviews = ({ recipeId }) => {
         <button
           type="submit"
           disabled={submitting}
-          className="bg-teal-600 text-white py-2 px-4 rounded hover:bg-teal-700"
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none"
         >
           {submitting ? "Submitting..." : isEditing ? "Update Review" : "Submit Review"}
         </button>
       </form>
+
+      {feedbackMessage && (
+  <div
+    className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50"
+  >
+    <div className="bg-green-100 text-green-700 px-6 py-3 rounded-lg shadow-lg text-center">
+      {feedbackMessage}
+    </div>
+  </div>
+)}
 
       {/* Render Reviews */}
       {reviews.length > 0 ? (
@@ -235,25 +261,20 @@ const RecipeReviews = ({ recipeId }) => {
           {reviews.map((review) => (
             <div key={review._id} className="border rounded-lg p-4 bg-gray-50">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-semibold">{review.username}</p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(review.date).toLocaleDateString()}
-                  </p>
-                </div>
+                <p className="text-sm font-semibold">{review.username}</p>
                 <p className="font-medium text-teal-600">Rating: {review.rating} / 5</p>
               </div>
               <p className="text-gray-700 mt-2">{review.review}</p>
               <div className="mt-2 flex gap-2">
                 <button
                   onClick={() => handleEdit(review)}
-                  className="text-blue-500 hover:text-blue-700 focus:outline-none font-semibold text-sm px-3 py-1 rounded border"
+                  className="px-3 py-1 text-blue-600 border border-blue-600 rounded hover:bg-blue-600 hover:text-white"
                 >
                   Edit
                 </button>
                 <button
-                  onClick={() => handleDelete(review._id)}
-                  className="text-red-500 hover:text-red-700 focus:outline-none font-semibold text-sm px-3 py-1 rounded border"
+                  onClick={() => setConfirmDelete(review._id)}
+                  className="px-3 py-1 text-red-600 border border-red-600 rounded hover:bg-red-600 hover:text-white"
                 >
                   Delete
                 </button>
@@ -262,24 +283,24 @@ const RecipeReviews = ({ recipeId }) => {
           ))}
         </div>
       ) : (
-        <p>No reviews yet. Be the first to share your thoughts!</p>
+        <p>No reviews yet. Be the first to leave a review!</p>
       )}
 
-      {/* On-screen confirmation for deletion */}
+      {/* Delete Confirmation */}
       {confirmDelete && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-10">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
-            <p className="text-lg font-semibold mb-4">Are you sure you want to delete this review?</p>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+            <p className="mb-4">Are you sure you want to delete this review?</p>
             <div className="flex justify-between">
               <button
-                onClick={() => confirmDeleteReview(true)}
-                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                onClick={() => handleDelete(confirmDelete)}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none"
               >
                 Yes, Delete
               </button>
               <button
-                onClick={() => confirmDeleteReview(false)}
-                className="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400"
+                onClick={() => setConfirmDelete(null)}
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 focus:outline-none"
               >
                 Cancel
               </button>

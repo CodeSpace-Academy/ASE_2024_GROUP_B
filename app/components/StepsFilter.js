@@ -30,26 +30,43 @@ const StepsFilter = ({ selectedSteps, setSelectedSteps }) => {
   };
 
   return (
-    <form onSubmit={handleSearch} className="flex items-center space-x-2">
-      <label htmlFor="steps" className="text-gray-700 font-bold">
+    <form onSubmit={handleSearch} className="flex items-center space-x-4">
+      <label
+        htmlFor="steps"
+        className="text-[var(--foreground)] font-bold"
+      >
         Steps:
       </label>
       <input
         type="number"
         value={selectedSteps || ""}
         onChange={handleInputChange}
-        className="px-4 py-2 border-2 border-gray-400 rounded-lg"
+        className="px-4 py-2 border-2 rounded-lg"
+        style={{
+          backgroundColor: "var(--filter-bg)",
+          borderColor: "var(--filter-border)",
+          color: "var(--filter-text)",
+        }}
         placeholder="Enter steps"
       />
       <button
-  type="submit"
-  className="px-4 py-2 text-sm text-white bg-brown rounded-full hover:bg-green-800 transition duration-200"
->
-  Filter
-</button>
-
+        type="submit"
+        className="px-4 py-2 text-sm rounded-full transition duration-200"
+        style={{
+          backgroundColor: "var(--button-bg)",
+          color: "var(--button-text)",
+        }}
+        onMouseOver={(e) =>
+          (e.currentTarget.style.backgroundColor = "var(--button-hover-bg)")
+        }
+        onMouseOut={(e) =>
+          (e.currentTarget.style.backgroundColor = "var(--button-bg)")
+        }
+      >
+        Filter
+      </button>
     </form>
-  );
+  );  
 };
 
 export default StepsFilter;

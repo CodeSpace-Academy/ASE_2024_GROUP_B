@@ -21,11 +21,19 @@ export async function GET(req) {
     const limit = parseInt(url.searchParams.get("limit") || "20", 10);
     const search = url.searchParams.get("search") || "";
     const category = url.searchParams.get("category") || "";
-    const tags = url.searchParams.get("tags") ? url.searchParams.get("tags").split(",").map(tag => tag.trim()) : [];
+    const tags = url.searchParams.get("tags")
+      ? url.searchParams
+          .get("tags")
+          .split(",")
+          .map((tag) => tag.trim())
+      : [];
     const steps = parseInt(url.searchParams.get("steps") || "", 10);
     const topRated = url.searchParams.get("top-rated") === "true"; // Check if requesting top-rated recipes
-    const ingredients = url.searchParams.get("ingredients") ? url.searchParams.get("ingredients").split(",") : [];
-    const ingredientsMatchType = url.searchParams.get("ingredientsMatchType") || "all"; // Get the match type (either "all" or "any")
+    const ingredients = url.searchParams.get("ingredients")
+      ? url.searchParams.get("ingredients").split(",")
+      : [];
+    const ingredientsMatchType =
+      url.searchParams.get("ingredientsMatchType") || "all"; // Get the match type (either "all" or "any")
 
     const skip = (page - 1) * limit;
 
@@ -33,23 +41,35 @@ export async function GET(req) {
 
     if (topRated) {
       pipeline.push(
-        { $lookup: { from: "reviews", localField: "_id", foreignField: "recipeId", as: "reviews" } },
+        {
+          $lookup: {
+            from: "reviews",
+            localField: "_id",
+            foreignField: "recipeId",
+            as: "reviews",
+          },
+        },
         { $addFields: { averageRating: { $avg: "$reviews.rating" } } },
         { $sort: { averageRating: -1 } },
         { $limit: 10 },
         { $project: { title: 1, category: 1, averageRating: 1, tags: 1 } }
       );
     } else {
+      // Filtering stages
       if (search.trim() !== "") {
         pipeline.push({ $match: { title: new RegExp(search, "i") } });
       }
 
       if (category.trim() !== "") {
-        pipeline.push({ $match: { category: new RegExp(`.*${category}.*`, "i") } });
+        pipeline.push({
+          $match: { category: new RegExp(`.*${category}.*`, "i") },
+        });
       }
 
       if (tags.length > 0) {
-        pipeline.push({ $match: { tags: { $in: tags.map(tag => new RegExp(tag, "i")) } } });
+        pipeline.push({
+          $match: { tags: { $in: tags.map((tag) => new RegExp(tag, "i")) } },
+        });
       }
 
       if (!isNaN(steps)) {
@@ -60,20 +80,38 @@ export async function GET(req) {
         const operator = ingredientsMatchType === "all" ? "$all" : "$in";
         pipeline.push({
           $match: {
-            "ingredients.name": { [operator]: ingredients.map(ingredient => new RegExp(ingredient, "i")) }
-          }
+            "ingredients.name": {
+              [operator]: ingredients.map(
+                (ingredient) => new RegExp(ingredient, "i")
+              ),
+            },
+          },
         });
       }
 
-      pipeline.push({ $skip: skip }, { $limit: limit });
+      // Save the total count
+      pipeline.push({
+        $facet: {
+          totalMatches: [{ $count: "total" }], // Total count facet
+          paginatedResults: [
+            { $skip: skip }, // Pagination
+            { $limit: limit }, // Pagination
+          ],
+        },
+      });
     }
 
-    const recipesCursor = db.collection("recipes").aggregate(pipeline, {
-      maxTimeMS: 60000,
-      allowDiskUse: true,
-    });
+    // Execute the pipeline
+    const result = await db
+      .collection("recipes")
+      .aggregate(pipeline, {
+        maxTimeMS: 60000,
+        allowDiskUse: true,
+      })
+      .toArray();
 
-    const recipes = await recipesCursor.toArray();
+    const totalMatches = result[0]?.totalMatches?.[0]?.total || 0;
+    const recipes = result[0]?.paginatedResults || [];
 
     if (recipes.length === 0) {
       return NextResponse.json(
@@ -81,8 +119,8 @@ export async function GET(req) {
         { status: 200 }
       );
     }
-
-    return NextResponse.json({ recipes }, { status: 200 });
+    // Return total count and paginated recipes
+    return NextResponse.json({ totalMatches, recipes }, { status: 200 });
   } catch (error) {
     return handleApiError(NextResponse, error);
   }
