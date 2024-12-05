@@ -4,9 +4,9 @@
 @tailwind utilities;
 
 :root {
-  --background: #F1E9D2;
+  --background: #fbfaf8;
   --foreground: #171717;
-  --card-bg: #FFF5E1;
+  --card-bg: #f8dfad;
   --hover-shadow: #D2B48C;
   --button-bg: #D2B48C; 
   --button-text: #171717;

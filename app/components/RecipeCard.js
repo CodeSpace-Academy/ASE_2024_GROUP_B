@@ -32,7 +32,7 @@ export default function RecipeCard({ recipe, searchQuery }) {
   // Calculate total time by adding prep and cook times
   const totalTime = (recipe.prep || 0) + (recipe.cook || 0);
   return (
-    <div className="bg-[var(--card-bg)] rounded-lg overflow-hidden shadow-md hover:shadow-2xl hover:shadow-[var(--hover-shadow)] p-4">
+    <div className="bg-[var(--recipe-bg)] p-2 mt-6 rounded-lg shadow-md hover:shadow-lg flex-shrink-0 w-80 h-50 flex flex-col">
       <Head>
         <title>{recipe.title} | Recipe Details</title>
         <meta
@@ -53,7 +53,9 @@ export default function RecipeCard({ recipe, searchQuery }) {
       <Carousel
         images={recipe.images}
         alt={recipe.title}
-        className="w-full h-48 object-cover rounded-md"
+        width={288} // Matches w-72
+        height={150} // Matches h-48
+        className="w-full h-30 object-cover rounded-lg"
       />
       <p className="text-[var(--text-muted)] text-xs mt-1">
         Published : {formatDate(recipe.published)}

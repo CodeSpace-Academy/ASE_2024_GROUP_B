@@ -50,7 +50,6 @@ export default async function RecipePage({ searchParams }) {
             selectedTags={searchParams.tags ? searchParams.tags.split(",") : []}
             page={currentPage}
           />
-        
       </div>
 
       {/* Display filters applied */}
@@ -89,7 +88,8 @@ export default async function RecipePage({ searchParams }) {
       )}
 
       {/* Recipe Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="overflow-x-hidden">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-4 sm:px-6 lg:px-8">
         {recipes.map((recipe) => (
           <RecipeCard
             key={recipe._id}
@@ -98,6 +98,9 @@ export default async function RecipePage({ searchParams }) {
           />
         ))}
       </div>
+      </div>
+
+
 
       {/* Pagination */}
       <div className="flex justify-center mt-8 items-center">
