@@ -42,18 +42,15 @@ export default async function RecipePage({ searchParams }) {
 
   return (
     <main>
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex-1 flex justify-center">
+      <div className="flex-1 flex justify-center">
           <SearchBar />
-        </div>
-        <div className="ml-2 flex items-center mt-6">
           <AdvancedFiltering
             selectedCategory={searchParams.category}
             selectedSteps={searchParams.steps}
             selectedTags={searchParams.tags ? searchParams.tags.split(",") : []}
             page={currentPage}
           />
-        </div>
+        
       </div>
 
       {/* Display filters applied */}
