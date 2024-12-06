@@ -25,12 +25,50 @@ export async function POST(req) {
     }
 
     const existingList = await shoppingLists.findOne({ userId });
-    if (existingList) {
-      return NextResponse.json(
-        { message: "Shopping list for this user already exists." },
-        { status: 409 }
-      );
-    }
+    // Modify POST to check for existing list and update or overwrite if required
+if (existingList) {
+  // Decide to append or overwrite based on client-side request flags
+  if (req.query.overwrite === "true") {
+    const updatedList = {
+      ...existingList,
+      items: items.map((item) => ({
+        name: item.name.trim().toLowerCase(),
+        quantity: item.quantity || 1,
+        purchased: item.purchased || false,
+      })),
+      updatedAt: new Date(),
+    };
+    await shoppingLists.updateOne({ userId }, { $set: updatedList });
+    return NextResponse.json(
+      { message: "Shopping list overwritten successfully." },
+      { status: 200 }
+    );
+  } else {
+    const newItems = items.filter(
+      (newItem) =>
+        !existingList.items.some((existingItem) => existingItem.name === newItem.name)
+    );
+    const updatedItems = [
+      ...existingList.items,
+      ...newItems.map((item) => ({
+        name: item.name.trim().toLowerCase(),
+        quantity: item.quantity || 1,
+        purchased: item.purchased || false,
+      })),
+    ];
+    await shoppingLists.updateOne(
+      { userId },
+      {
+        $set: { items: updatedItems, updatedAt: new Date() },
+      }
+    );
+    return NextResponse.json(
+      { message: "New ingredients added to existing shopping list." },
+      { status: 200 }
+    );
+  }
+}
+
 
     const newShoppingList = {
       userId,

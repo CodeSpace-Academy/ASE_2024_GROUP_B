@@ -5,6 +5,7 @@ import { Card, CardContent } from "../../components/ui/card";
 import RecipeReviews from "../../components/RecipeReviews";
 import ReadInstructionsButton from "../../components/ReadInstructionsButton";
 import { Home } from "lucide-react";
+import ShoppingList from "../../components/ShoppingList";
 
 /**
  * The RecipeDetail component fetches and displays a specific recipe based on its ID.
@@ -22,6 +23,7 @@ import { Home } from "lucide-react";
  */
 export default async function RecipeDetail({ params }) {
   const { id } = params;
+  const recipeId = params.id;
   let recipe;
 
   try {
@@ -186,6 +188,7 @@ export default async function RecipeDetail({ params }) {
                 <li className="text-gray-500">No ingredients available.</li>
               )}
             </ul>
+            <ShoppingList ingredients={ingredients} />
           </CardContent>
         </Card>
 
