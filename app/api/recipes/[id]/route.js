@@ -1,10 +1,10 @@
-import { ObjectId } from "mongodb";
+import clientPromise from "../../../../lib/mongodb";
 
 export async function PUT(req, { params }) {
   const { id } = params;
   const body = await req.json();
 
-  // Validate UUID format (adjust regex if needed for specific UUID version)
+  // Validate UUID format
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   if (!uuidRegex.test(id)) {
     return new Response(
@@ -17,8 +17,9 @@ export async function PUT(req, { params }) {
     const client = await clientPromise;
     const db = client.db("devdb");
 
+    // Find the recipe by its string _id
     const updatedRecipe = await db.collection("recipes").updateOne(
-      { _id: id }, // Use `id` as a string
+      { _id: id }, // Use the string `id` directly
       {
         $set: { description: body.description },
         ...(await db.collection("recipes").findOne({ _id: id }))?.updatedBy

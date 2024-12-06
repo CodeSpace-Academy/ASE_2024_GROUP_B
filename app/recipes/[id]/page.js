@@ -1,10 +1,11 @@
 import { fetchProductById } from "../../../lib/api";
 import Image from "next/image";
-import { Clock, Users } from "lucide-react";
+import { Clock, Users, Home, Edit  } from "lucide-react";
 import { Card, CardContent } from "../../components/ui/card";
 import RecipeReviews from "../../components/RecipeReviews";
+import RecipeDescriptionEdit from "../../components/RecipeDescriptionEdit";
 import ReadInstructionsButton from "../../components/ReadInstructionsButton";
-import { Home } from "lucide-react";
+// import { Home } from "lucide-react";
 
 /**
  * The RecipeDetail component fetches and displays a specific recipe based on its ID.
@@ -23,10 +24,19 @@ import { Home } from "lucide-react";
 export default async function RecipeDetail({ params }) {
   const { id } = params;
   let recipe;
+  let lastEditor = null; 
 
   try {
     const data = await fetchProductById(id);
     recipe = data;
+    // Fetch last editor information if available
+    if (recipe?.lastEditedBy) {
+      try {
+        lastEditor = await fetchUserById(recipe.lastEditedBy);
+      } catch (userError) {
+        console.error("Failed to fetch last editor:", userError);
+      }
+    }
   } catch (error) {
     console.error("Failed to fetch recipe:", error);
     return (
@@ -67,6 +77,8 @@ export default async function RecipeDetail({ params }) {
     ingredients,
     instructions,
     nutrition,
+    lastEditedAt,
+
   } = recipe;
 
   const totalTime = (prep || 0) + (cook || 0);
@@ -86,7 +98,18 @@ export default async function RecipeDetail({ params }) {
       </div>
 
       <h1 className="text-4xl font-bold text-gray-900 mb-4">{title}</h1>
-      <p className="text-lg text-gray-700 mb-6">{description}</p>
+     {/* Description Section */}
+     <div className="mb-6">
+        <RecipeDescriptionEdit initialDescription={description} recipeId={id} />
+        {lastEditor && lastEditedAt && (
+          <div className="text-sm text-gray-500 mt-2 flex items-center">
+            <Edit className="w-4 h-4 mr-2 text-gray-400" />
+            Last edited
+            {lastEditor?.name ? ` by ${lastEditor.name}` : ""}{" "}
+            { `${formatDistanceToNow(new Date(lastEditedAt))} ago`}
+          </div>
+        )}
+      </div>
 
       {tags && tags.length > 0 && (
         <div className="mb-6">
