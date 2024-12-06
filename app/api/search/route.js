@@ -8,7 +8,7 @@ import clientPromise from "../../../lib/mongodb";
  */
 export async function GET(req) {
   try {
-    const url = new URL(req.url);
+    const url = new URL(req.url, process.env.NEXT_PUBLIC_BASE_URL);
     const searchTerm = url.searchParams.get("searchTerm");
     const page = parseInt(url.searchParams.get("page") || "1", 10);
     const limit = parseInt(url.searchParams.get("limit") || "20", 10);

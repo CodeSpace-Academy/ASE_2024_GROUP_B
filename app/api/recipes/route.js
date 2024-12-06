@@ -16,7 +16,7 @@ export async function GET(req) {
     const client = await clientPromise;
     const db = client.db("devdb");
 
-    const url = new URL(req.url);
+    const url = new URL(req.url, process.env.NEXT_PUBLIC_BASE_URL);
     const page = parseInt(url.searchParams.get("page") || "1", 10);
     const limit = parseInt(url.searchParams.get("limit") || "20", 10);
     const search = url.searchParams.get("search") || "";
