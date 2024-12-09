@@ -1,3 +1,4 @@
+// app/recipe/page.js
 import Link from "next/link";
 import RecipeCard from "../components/RecipeCard";
 import SearchBar from "../components/SearchBar";
@@ -37,8 +38,6 @@ export default async function RecipePage({ searchParams }) {
   const recipes = Array.isArray(data) ? data : [];
   const noRecipesFound =
     recipes.length === 0 && searchParams.steps && searchParams.steps !== "";
-    const noRecipesFoundInSearch =
-    recipes.length === 0 && searchParams.search && searchParams.search !== "";
 
   return (
     <main>
@@ -82,14 +81,6 @@ export default async function RecipePage({ searchParams }) {
       {noRecipesFound && (
         <p className="text-center text-lg text-red-500 mb-8">
           No recipes found with the specified number of steps.
-        </p>
-      )}
-
-
-      {/* No recipes found message in search */}
-      {noRecipesFoundInSearch && (
-        <p className="text-center text-lg text-red-500 mb-8">
-         Oops! It looks like we do not have that recipe just yet. Maybe try a different search?
         </p>
       )}
 
