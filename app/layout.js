@@ -1,69 +1,79 @@
-import './global.css';
-/**
- * Metadata configuration for the Next.js application.
- * This object defines various site-wide metadata, including
- * titles, descriptions, icons, social sharing information, and more.
- */
-export const metadata = {
-  title: "Arejeng Recipes",
-  description: "Arejeng Recipe App is your ultimate culinary companion, offering an extensive collection of easy-to-follow recipes that cater to every taste and occasion. Whether you're a seasoned chef or a kitchen newbie, our app empowers you to discover, save, and share delicious recipes from around the world. With step-by-step instructions, customizable recipe options, and handy cooking tips, Arejeng Recipe App makes every meal a memorable experience. Explore new flavors, create mouth-watering dishes, and let your cooking journey begin!",
-  icons: {
-    icon: [
-      { rel: "icon", url: "/favicon-192x192.png", sizes: "192x192" },
-      { rel: "icon", url: "/favicon.svg", type: "image/svg+xml" },
-      { rel: "shortcut icon", url: "/favicon.ico" },
-    ],
-    apple: "/apple-touch-icon.png",
-  },
-  manifest: "/site.webmanifest",
-  applicationName: "ArejengRecipeApp",
-  openGraph: {
-    title: "Arejeng Recipe App",
-    description: "Discover a variety of recipes with ArejengRecipeApp",
-    // Uncomment and add the correct URL of the website if available
-    // url: "https://mywebsite.com", 
-    type: "website",
-    images: [
-      {
-        // Uncomment and add the correct URL for the Open Graph image if available
-        // url: "https://yourwebsite.com/og-image.jpg",
-        width: 800,
-        height: 600,
-        alt: "Arejeng Recipe App",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    site: "@YourTwitterHandle",
-    title: "Arejeng Recipe App",
-    description: "Discover a variety of recipes with ArejengRecipeApp",
-    image: "https://yourwebsite.com/twitter-image.jpg",
-  },
-  keywords: ["recipes", "cooking", "food", "ArejengRecipeApp"],
-  author: "Name of author", // Add the name of the author here
-};
+"use client";
+import "./global.css";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import Head from "next/head";
+import { useEffect, useState } from "react";
+import { metadata } from "../lib/metadata";
 
 /**
- * Viewport configuration for the Next.js application.
- * Moved the themeColor here as per the latest Next.js requirements.
- */
-export const viewport = {
-  themeColor: "#ffffff",
-};
-
-/**
- * Root layout component for the Next.js application.
- * This component wraps the entire app, providing the main HTML structure.
+ * Root layout component of the application.
+ * Provides the main structure with the header, main content area, and footer.
  *
- * @param {Object} props - The properties passed to the component.
- * @param {React.ReactNode} props.children - The nested content to render inside the layout.
- * @returns {JSX.Element} The RootLayout component.
+ * @function RootLayout
+ * @param {Object} props - Component properties.
+ * @param {React.ReactNode} props.children - Child elements to be rendered in the main section.
+ * @returns {JSX.Element} The HTML layout for the page.
  */
 export default function RootLayout({ children }) {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [themeLoaded, setThemeLoaded] = useState(false);
+
+  useEffect(() => {
+    // Retrieve theme from localStorage or fallback to system preference
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDarkMode =
+      savedTheme === "dark" ||
+      (!savedTheme &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+    // Apply the theme immediately to <html> element
+    if (prefersDarkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+
+    // Set the theme state
+    setIsDarkMode(prefersDarkMode);
+    setThemeLoaded(true); // Theme is now applied
+  }, []); // Only run once when the component mounts
+
+  useEffect(() => {
+    if (themeLoaded) {
+      // Persist theme to localStorage
+      localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+      // Apply the dark theme to the <html> element based on the state
+      if (isDarkMode) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    }
+  }, [isDarkMode, themeLoaded]);
+
+  const toggleTheme = () => {
+    const newTheme = !isDarkMode ? "dark" : "light";
+    setIsDarkMode(!isDarkMode);
+    localStorage.setItem("theme", newTheme); // Store the updated theme preference
+  };
+
   return (
     <html lang="en">
-      <body>{children}</body>
+      <Head>
+        <title>{metadata.title}</title>
+        <meta name="description" content={metadata.description} />
+        <meta name="keywords" content={metadata.keywords.join(", ")} />
+        <meta name="author" content={metadata.author} />
+        <link rel="manifest" href={metadata.manifest} />
+        <meta name="theme-color" content={isDarkMode ? "#0a0a0a" : "#ffffff"} />
+      </Head>
+      <body className={`flex flex-col min-h-screen`}>
+        {/* Pass isDarkMode and toggleTheme to Header */}
+        <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
+        <main className="flex-grow pt-16">{children}</main>
+        <Footer />
+      </body>
     </html>
   );
 }
