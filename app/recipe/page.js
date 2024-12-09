@@ -1,4 +1,3 @@
-// app/recipe/page.js
 import Link from "next/link";
 import RecipeCard from "../components/RecipeCard";
 import SearchBar from "../components/SearchBar";
@@ -38,6 +37,20 @@ export default async function RecipePage({ searchParams }) {
   const recipes = Array.isArray(data) ? data : [];
   const noRecipesFound =
     recipes.length === 0 && searchParams.steps && searchParams.steps !== "";
+    const noRecipesFoundInSearch =
+    recipes.length === 0 && searchParams.search && searchParams.search !== "";
+
+  // Construct the query string for pagination links, including filters
+  const queryString = (page) => {
+    const params = new URLSearchParams({
+      page: page,
+      search: searchParams.search || "",
+      category: searchParams.category || "",
+      tags: searchParams.tags || "",
+      steps: searchParams.steps || "",
+    });
+    return `?${params.toString()}`;
+  };
 
   return (
     <main>
@@ -84,19 +97,29 @@ export default async function RecipePage({ searchParams }) {
         </p>
       )}
 
+
+      {/* No recipes found message in search */}
+      {noRecipesFoundInSearch && (
+        <p className="text-center text-lg text-red-500 mb-8">
+         Oops! It looks like we do not have that recipe just yet. Maybe try a different search?
+        </p>
+      )}
+
       {/* Recipe Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {recipes.map((recipe) => (
-          <RecipeCard key={recipe._id} recipe={recipe} />
+          <RecipeCard
+            key={recipe._id}
+            recipe={recipe}
+            searchQuery={searchParamsToInclude.search}
+          />
         ))}
       </div>
 
       {/* Pagination */}
       <div className="flex justify-center mt-8 items-center">
         <Link
-          href={`/recipe?page=${currentPage - 1}&search=${
-            searchParams.search || ""
-          }&category=${searchParams.category || ""}`}
+          href={queryString(currentPage - 1)}
           className={`w-10 h-10 flex items-center justify-center rounded-full text-white ${
             currentPage === 1
               ? "bg-gray-300 pointer-events-none opacity-50"
@@ -113,9 +136,7 @@ export default async function RecipePage({ searchParams }) {
         </span>
 
         <Link
-          href={`/recipe?page=${currentPage + 1}&search=${
-            searchParams.search || ""
-          }&category=${searchParams.category || ""}`}
+          href={queryString(currentPage + 1)}
           className="w-10 h-10 flex items-center justify-center rounded-full text-white bg-orange-500 hover:bg-orange-600"
           aria-label="Next page"
           title="Next page"
