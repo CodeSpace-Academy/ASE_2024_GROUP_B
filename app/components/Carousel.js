@@ -26,18 +26,21 @@ export default function Carousel({ images }) {
       <Image
         src={images[currentIndex]}
         alt={`Slide ${currentIndex}`}
-        width={500} height={500} quality={75} priority
+        width={500}
+        height={500}
+        quality={75}
+        priority
         className="w-full h-full object-contain"
       />
       {/* Previous Button */}
       {hasMultipleImages && (
         <button
           onClick={prevSlide}
-          className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow"
+          className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-[var(--button-bg)] p-2 rounded-full shadow hover:bg-[var(--button-hover-bg)] transition-colors duration-300"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-gray-800"
+            className="h-6 w-6 text-[var(--icon-color)]"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -55,11 +58,11 @@ export default function Carousel({ images }) {
       {hasMultipleImages && (
         <button
           onClick={nextSlide}
-          className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow"
+          className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-[var(--button-bg)] p-2 rounded-full shadow hover:bg-[var(--button-hover-bg)] transition-colors duration-300"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-gray-800"
+            className="h-6 w-6 text-[var(--icon-color)]"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -75,4 +78,4 @@ export default function Carousel({ images }) {
       )}
     </div>
   );
-}
+  }

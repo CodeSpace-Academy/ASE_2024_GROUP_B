@@ -53,7 +53,7 @@ export default function Error({ error, reset }) {
   }, [error]);
 
   return (
-    <section className="flex items-center h-full p-[1.28rem] text-teal-900">
+    <section className="flex items-center h-full p-[1.28rem] text-primary">
       <div className="container flex flex-col items-center justify-center px-5 mx-auto my-8">
         <div className="max-w-md text-center">
           <motion.div
@@ -64,7 +64,7 @@ export default function Error({ error, reset }) {
             <SpinningGear />
           </motion.div>
           <motion.h2
-            className="mb-8 font-extrabold text-9xl text-teal-600"
+            className="mb-8 font-extrabold text-9xl text-highlight"
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
@@ -80,12 +80,12 @@ export default function Error({ error, reset }) {
             Something went wrong!
           </motion.p>
           <motion.p
-            className="mt-4 mb-8 text-teal-700"
+            className="mt-4 mb-8 text-secondary"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6, duration: 0.5 }}
           >
-            Don&apost            t worry, try refreshing or return to the homepage.
+            Don&apos;t worry, try refreshing or return to the homepage.
           </motion.p>
           <motion.div
             className="flex justify-center space-x-4"
@@ -95,7 +95,7 @@ export default function Error({ error, reset }) {
           >
             <motion.button
               onClick={() => reset()}
-              className="px-8 py-3 font-semibold rounded bg-teal-600 text-teal-50 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-opacity-50"
+              className="px-8 py-3 font-semibold rounded bg-button text-button-text hover:bg-button-hover focus:outline-none focus:ring-2 focus:ring-highlight focus:ring-opacity-50"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -106,4 +106,4 @@ export default function Error({ error, reset }) {
       </div>
     </section>
   );
-}
+  }
