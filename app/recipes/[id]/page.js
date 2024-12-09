@@ -1,7 +1,11 @@
 import { fetchProductById } from "../../../lib/api";
 import Image from "next/image";
-import { Clock, Users } from "lucide-react";
+import { Clock, Users, Home, Edit  } from "lucide-react";
 import { Card, CardContent } from "../../components/ui/card";
+import RecipeReviews from "../../components/RecipeReviews";
+import RecipeDescriptionEdit from "../../components/RecipeDescriptionEdit";
+import ReadInstructionsButton from "../../components/ReadInstructionsButton";
+// import { Home } from "lucide-react";
 
 /**
  * The RecipeDetail component fetches and displays a specific recipe based on its ID.
@@ -20,23 +24,30 @@ import { Card, CardContent } from "../../components/ui/card";
 export default async function RecipeDetail({ params }) {
   const { id } = params;
   let recipe;
+  let lastEditor = null; 
 
   try {
-    // Fetch recipe data from the API
     const data = await fetchProductById(id);
-    recipe = data; // Assign the fetched recipe to the recipe variable
-    // Handle Errors
+    recipe = data;
+    // Fetch last editor information if available
+    if (recipe?.lastEditedBy) {
+      try {
+        lastEditor = await fetchUserById(recipe.lastEditedBy);
+      } catch (userError) {
+        console.error("Failed to fetch last editor:", userError);
+      }
+    }
   } catch (error) {
     console.error("Failed to fetch recipe:", error);
     return (
       <div className="p-4 text-center">
         <p className="text-red-500">Error: {error.message}</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-teal-500 text-white rounded"
+        <a
+          href="/"
+          className="mt-4 inline-block text-white bg-brown rounded-full px-6 py-2 hover:bg-green-800 transition duration-200"
         >
-          Retry
-        </button>
+          Back to Recipes
+        </a>
       </div>
     );
   }
@@ -44,12 +55,17 @@ export default async function RecipeDetail({ params }) {
   if (!recipe) {
     return (
       <div className="p-4 text-center">
-        <p>Recipe not found</p>
+        <p className="text-gray-700">Recipe not found</p>
+        <a
+          href="/"
+          className="mt-4 inline-block text-white bg-brown rounded-full px-6 py-2 hover:bg-green-800 transition duration-200"
+        >
+          Back to Recipes
+        </a>
       </div>
     );
   }
 
-  // Destructure with the correct property names
   const {
     prep,
     cook,
@@ -60,91 +76,68 @@ export default async function RecipeDetail({ params }) {
     images,
     ingredients,
     instructions,
-    nutrition
+    nutrition,
+    lastEditedAt,
+
   } = recipe;
 
-  // Calculate total time
   const totalTime = (prep || 0) + (cook || 0);
 
-  /**
-   * Formats time in minutes to a readable string (e.g., "15 mins").
-   * @param {number} timeInMinutes - The time in minutes.
-   * @returns {string} The formatted time string.
-   */
-  const formatTime = (timeInMinutes) => {
-    return `${timeInMinutes} mins`;
-  };
+  const formatTime = (timeInMinutes) => `${timeInMinutes} mins`;
 
   return (
-    <main className="container mx-auto p-4 max-w-4xl">
-      {/* Recipe Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">{title}</h1>
-
-        {/* Tags */}
-        {tags && tags.length > 0 && (
-          <div className="mb-4">
-            <div className="flex flex-wrap gap-2">
-              {tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-sm"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <p className="text-gray-700 mb-4">{description}</p>
-
-        {/* Recipe Overview */}
-        <div className="flex flex-wrap gap-6 mb-6">
-          <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-gray-600" />
-            <div>
-              <p className="text-sm text-gray-600">Prep Time</p>
-              <p className="font-medium">{formatTime(prep)}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-gray-600" />
-            <div>
-              <p className="text-sm text-gray-600">Cook Time</p>
-              <p className="font-medium">{formatTime(cook)}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-gray-600" />
-            <div>
-              <p className="text-sm text-gray-600">Total Time</p>
-              <p className="font-medium">{formatTime(totalTime)}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-gray-600" />
-            <div>
-              <p className="text-sm text-gray-600">Servings</p>
-              <p className="font-medium">{servings}</p>
-            </div>
-          </div>
-        </div>
+    <main className="container mx-auto p-6 max-w-4xl">
+      <div className="mb-6 flex justify-between items-center">
+        <a
+          href="/recipe"
+          className="text-white bg-brown px-6 py-2 rounded-lg hover:bg-peach transition duration-200"
+          title="Back  to Recipes"
+        >
+          <Home className="w-5 h-5" />
+        </a>
       </div>
 
-      {/* Recipe Images */}
-      {images && images.length > 0 && (
+      <h1 className="text-4xl font-bold text-gray-900 mb-4">{title}</h1>
+     {/* Description Section */}
+     <div className="mb-6">
+        <RecipeDescriptionEdit initialDescription={description} recipeId={id} />
+        {lastEditor && lastEditedAt && (
+          <div className="text-sm text-gray-500 mt-2 flex items-center">
+            <Edit className="w-4 h-4 mr-2 text-gray-400" />
+            Last edited
+            {lastEditor?.name ? ` by ${lastEditor.name}` : ""}{" "}
+            { `${formatDistanceToNow(new Date(lastEditedAt))} ago`}
+          </div>
+        )}
+      </div>
+
+      {tags && tags.length > 0 && (
+        <div className="mb-6">
+          <div className="flex flex-wrap gap-2">
+            {tags.map((tag, index) => (
+              <span
+                key={index}
+                className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {images.length > 0 && (
         <div className="mb-8">
           <Image
             src={images[0]}
             alt={title}
             width={800}
             height={400}
-            className="w-full h-[400px] object-cover rounded-lg mb-4"
+            className="w-full h-[400px] object-cover rounded-lg shadow-md mb-4"
             priority
           />
           {images.length > 1 && (
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {images.slice(1).map((image, index) => (
                 <Image
                   key={index}
@@ -152,7 +145,7 @@ export default async function RecipeDetail({ params }) {
                   alt={`${title} ${index + 2}`}
                   width={200}
                   height={200}
-                  className="w-full h-32 object-cover rounded-lg"
+                  className="w-full h-32 object-cover rounded-lg shadow"
                 />
               ))}
             </div>
@@ -160,20 +153,58 @@ export default async function RecipeDetail({ params }) {
         </div>
       )}
 
-      {/* Recipe Content */}
+      <div className="flex flex-wrap gap-6 mb-8">
+        {prep !== undefined && (
+          <div className="flex items-center gap-2">
+            <Clock className="w-6 h-6 text-gray-600" />
+            <div>
+              <p className="text-sm text-gray-600">Prep Time</p>
+              <p className="font-medium">{formatTime(prep)}</p>
+            </div>
+          </div>
+        )}
+        {cook !== undefined && (
+          <div className="flex items-center gap-2">
+            <Clock className="w-6 h-6 text-gray-600" />
+            <div>
+              <p className="text-sm text-gray-600">Cook Time</p>
+              <p className="font-medium">{formatTime(cook)}</p>
+            </div>
+          </div>
+        )}
+        <div className="flex items-center gap-2">
+          <Clock className="w-6 h-6 text-gray-600" />
+          <div>
+            <p className="text-sm text-gray-600">Total Time</p>
+            <p className="font-medium">{formatTime(totalTime)}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Users className="w-6 h-6 text-gray-600" />
+          <div>
+            <p className="text-sm text-gray-600">Servings</p>
+            <p className="font-medium">{servings}</p>
+          </div>
+        </div>
+      </div>
+
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Ingredients Section */}
+        {/* Ingredients */}
         <Card>
           <CardContent className="pt-6">
             <h2 className="text-2xl font-semibold mb-4">Ingredients</h2>
             <ul className="space-y-2">
-              {Array.isArray(ingredients) ? (
-                ingredients.map((ingredient, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <span className="mt-1.5 w-2 h-2 rounded-full bg-teal-500 flex-shrink-0" />
-                    <span className="text-gray-700">{ingredient}</span>
-                  </li>
-                ))
+              {ingredients && Object.keys(ingredients).length > 0 ? (
+                Object.entries(ingredients).map(
+                  ([ingredient, quantity], index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <span className="w-2 h-2 rounded-full bg-teal-500 mt-1 flex-shrink-0" />
+                      <span className="text-gray-700">
+                        {quantity} {ingredient}
+                      </span>
+                    </li>
+                  )
+                )
               ) : (
                 <li className="text-gray-500">No ingredients available.</li>
               )}
@@ -181,62 +212,87 @@ export default async function RecipeDetail({ params }) {
           </CardContent>
         </Card>
 
-        {/* Instructions Section */}
-        <Card>
-          <CardContent className="pt-6">
-            <h2 className="text-2xl font-semibold mb-4">Instructions</h2>
+        <Card
+          className="shadow-lg rounded-lg border border-gray-200"
+          id="instructions-section"
+        >
+          <div className="flex justify-end px-6 pt-4">
+            <ReadInstructionsButton instructions={instructions} />
+          </div>
+          <CardContent className="pt-6 px-6">
+            <h2 className="text-xl font-semibold mb-3 text-gray-800">
+              Instructions
+            </h2>
+
             <ol className="space-y-4">
-            {Array.isArray(instructions) ? (
-              instructions.map((step, index) => (
-                <li key={index} className="flex gap-4">
-                  <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-teal-100 text-teal-700 rounded-full font-medium">
-                    {index + 1}
-                  </span>
-                  <p className="text-gray-700 pt-1">{step}</p>
+              {instructions.length > 0 ? (
+                instructions.map((step, index) => (
+                  <li key={index} className="flex gap-3 items-start">
+                    <div className="w-8 h-8 flex items-center justify-center bg-teal-100 text-teal-700 rounded-full font-medium shadow-sm text-sm">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-gray-600 leading-snug text-sm">
+                        {step}
+                      </p>
+                    </div>
+                  </li>
+                ))
+              ) : (
+                <li className="text-gray-500 text-center text-sm">
+                  No instructions available.
                 </li>
-              ))
-            ) : (
-              <li className="text-gray-500">No instructions available.</li>
-            )}
+              )}
             </ol>
           </CardContent>
         </Card>
       </div>
+
       {/* Nutritional Information */}
-    {nutrition && (
-      <Card className="mt-8">
-        <CardContent className="pt-6">
-          <h2 className="text-2xl font-semibold mb-4">Nutritional Information</h2>
-          <div className="grid grid-cols-2 gap-4 text-gray-700">
-            {nutrition.calories && (
-              <div>
-                <p className="text-sm">Calories</p>
-                <p className="font-medium">{nutrition.calories} kcal</p>
-              </div>
-            )}
-            {nutrition.fats && (
-              <div>
-                <p className="text-sm">Fats</p>
-                <p className="font-medium">{nutrition.fats} g</p>
-              </div>
-            )}
-            {nutrition.carbohydrates && (
-              <div>
-                <p className="text-sm">Carbohydrates</p>
-                <p className="font-medium">{nutrition.carbohydrates} g</p>
-              </div>
-            )}
-            {nutrition.proteins && (
-              <div>
-                <p className="text-sm">Proteins</p>
-                <p className="font-medium">{nutrition.proteins} g</p>
-              </div>
-            )}
-            {/* Additional nutrition data fields if available */}
-          </div>
-        </CardContent>
-      </Card>
-    )}
+      {nutrition && (
+        <Card className="mt-8">
+          <CardContent className="pt-6">
+            <h2 className="text-2xl font-semibold mb-4">
+              Nutritional Information
+            </h2>
+            <ul className="space-y-2">
+              {Object.entries(nutrition).map(([key, value]) => {
+                const units = {
+                  energy: "kJ",
+                  calories: "kcal",
+                  protein: "g",
+                  fat: "g",
+                  saturated: "g",
+
+                  carbohydrates: "g",
+                  sugar: "g",
+                  fiber: "g",
+                  sodium: "mg",
+                  cholesterol: "mg",
+                };
+
+                const unit = units[key.toLowerCase()] || "";
+
+                return (
+                  <li key={key} className="flex justify-between text-gray-700">
+                    <span className="capitalize">{key}</span>
+                    <span className="font-medium">
+                      {value} {unit}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Reviews */}
+      {id ? (
+        <RecipeReviews recipeId={id} />
+      ) : (
+        <p className="text-red-500">Loading recipe ID...</p>
+      )}
     </main>
   );
 }
